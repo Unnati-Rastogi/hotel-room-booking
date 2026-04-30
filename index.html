@@ -733,9 +733,322 @@ footer {
   .footer-top { grid-template-columns: 1fr; }
   .nav-links a:not(.nav-cta) { display: none; }
 }
+
+/* ══════════════════════════════════════════════
+   LOGIN OVERLAY
+══════════════════════════════════════════════ */
+#login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2e1e0e 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  transition: opacity .4s ease;
+}
+#login-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.login-box {
+  background: rgba(255,255,255,.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  padding: 40px 44px;
+  width: 100%; max-width: 460px;
+  box-shadow: 0 40px 80px rgba(0,0,0,.5);
+  animation: loginSlideIn .5s ease;
+}
+@keyframes loginSlideIn {
+  from { opacity:0; transform: translateY(32px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.login-logo {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 28px; justify-content: center;
+}
+.login-logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--dark2), var(--dark3));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 1.3rem; font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  border: 1px solid rgba(37,99,235,.3);
+}
+.login-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; color: #f5f0e8; font-weight: 600;
+}
+.login-logo-sub { font-size: .6rem; color: rgba(245,240,232,.4); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+
+.login-title { text-align: center; margin-bottom: 28px; }
+.login-title h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #f5f0e8; font-weight: 400; margin-bottom: 4px; }
+.login-title p  { font-size: .78rem; color: rgba(245,240,232,.45); letter-spacing: .5px; }
+
+/* Tabs */
+.login-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 24px; }
+.login-tab {
+  flex: 1; padding: 10px; text-align: center;
+  font-size: .74rem; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(245,240,232,.4); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all .2s;
+}
+.login-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* Login form fields */
+.lf { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.lf label { font-size: .65rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(245,240,232,.45); }
+.lf input {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px; padding: 11px 14px;
+  font-family: 'Inter', sans-serif; font-size: .86rem; color: #f5f0e8;
+  transition: border-color .2s, box-shadow .2s;
+}
+.lf input::placeholder { color: rgba(245,240,232,.25); }
+.lf input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+
+.btn-login-primary {
+  width: 100%; padding: 13px; margin-top: 6px;
+  background: var(--gold); border: none; border-radius: 6px;
+  color: #fff; font-family: 'Inter', sans-serif;
+  font-size: .84rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; transition: all .2s;
+}
+.btn-login-primary:hover { background: var(--gold2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,.35); }
+
+.login-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0; color: rgba(245,240,232,.2); font-size: .7rem; letter-spacing: 1px;
+}
+.login-divider::before, .login-divider::after { content:''; flex:1; height:1px; background: rgba(255,255,255,.08); }
+
+.btn-guest {
+  width: 100%; padding: 12px; margin-bottom: 6px;
+  background: transparent; border: 1px solid rgba(255,255,255,.14);
+  border-radius: 6px; color: rgba(245,240,232,.65);
+  font-family: 'Inter', sans-serif; font-size: .82rem; letter-spacing: 1px;
+  cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-guest:hover { border-color: rgba(245,240,232,.35); color: #f5f0e8; background: rgba(255,255,255,.04); }
+
+.login-note { text-align: center; font-size: .65rem; color: rgba(245,240,232,.25); margin-top: 14px; letter-spacing: .5px; }
+.login-err  { font-size: .76rem; color: #f87171; background: rgba(220,38,38,.12); border: 1px solid rgba(220,38,38,.2); border-radius: 5px; padding: 8px 12px; margin-bottom: 12px; display: none; }
+.login-err.show { display: block; }
+
+/* Admin toggle hint inside login */
+.admin-toggle { text-align: center; margin-top: 12px; }
+.admin-toggle a { font-size: .65rem; color: rgba(245,240,232,.2); cursor: pointer; text-decoration: underline; transition: color .2s; }
+.admin-toggle a:hover { color: rgba(245,240,232,.5); }
+
+/* ══════════════════════════════════════════════
+   USER PILL IN NAVBAR
+══════════════════════════════════════════════ */
+#user-pill {
+  display: none; align-items: center; gap: 10px;
+  background: rgba(37,99,235,.08); border: 1px solid rgba(37,99,235,.2);
+  border-radius: 99px; padding: 5px 14px 5px 8px;
+}
+#user-pill.show { display: flex; }
+.up-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: .72rem; font-weight: 700;
+}
+.up-name  { font-size: .76rem; font-weight: 500; color: var(--text); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.up-role  { font-size: .58rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); }
+.btn-logout {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 5px 11px; font-family: 'Inter', sans-serif;
+  font-size: .68rem; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--mid); cursor: pointer; transition: all .2s; margin-left: 4px;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* ══════════════════════════════════════════════
+   GUEST BANNER
+══════════════════════════════════════════════ */
+#guest-banner {
+  display: none;
+  background: linear-gradient(90deg, rgba(37,99,235,.06), rgba(37,99,235,.12));
+  border: 1px solid rgba(37,99,235,.2); border-radius: 8px;
+  padding: 12px 20px; margin-bottom: 18px;
+  text-align: center; font-size: .8rem; color: var(--mid);
+  animation: fadeIn .4s ease;
+}
+#guest-banner.show { display: block; }
+#guest-banner strong { color: var(--gold); }
+#guest-banner button {
+  background: var(--gold); border: none; border-radius: 4px;
+  padding: 5px 14px; color: #fff; font-family: 'Inter', sans-serif;
+  font-size: .72rem; font-weight: 500; letter-spacing: 1px;
+  cursor: pointer; margin-left: 12px; transition: background .2s;
+}
+#guest-banner button:hover { background: var(--gold2); }
+
+/* Toast notification */
+#toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(12px);
+  background: #1e293b; color: #f5f0e8; border-radius: 8px;
+  padding: 12px 22px; font-size: .8rem; letter-spacing: .5px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35); z-index: 4000;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ══════════════════════════════════════════════
+   MY BOOKINGS SECTION
+══════════════════════════════════════════════ */
+#my-bookings-section { margin-bottom: 60px; }
+#my-bookings-login-prompt {
+  text-align: center; padding: 48px 24px;
+  background: var(--cream2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--mid); font-size: .9rem;
+}
+#my-bookings-login-prompt .prompt-icon { font-size: 2.4rem; margin-bottom: 12px; }
+#my-bookings-login-prompt p { margin-bottom: 16px; }
+#my-bookings-login-prompt button {
+  background: var(--gold); border: none; border-radius: 5px;
+  padding: 10px 24px; color: #fff; font-family: 'Inter', sans-serif;
+  font-size: .8rem; font-weight: 500; letter-spacing: 1px; cursor: pointer;
+  transition: background .2s;
+}
+#my-bookings-login-prompt button:hover { background: var(--gold2); }
+
+/* ══════════════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════════════ */
+#admin-panel {
+  display: none; min-height: 100vh;
+  background: #f8fafc;
+}
+#admin-panel.open { display: block; }
+
+.admin-topbar {
+  background: linear-gradient(90deg, #0f172a, #1e293b);
+  padding: 16px 40px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 66px; z-index: 200;
+}
+.admin-topbar h2 { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #f0e8d8; font-weight: 400; }
+.admin-topbar-right { display: flex; align-items: center; gap: 12px; }
+.btn-admin-back {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+  border-radius: 5px; padding: 7px 16px; color: rgba(240,232,216,.7);
+  font-family: 'Inter', sans-serif; font-size: .72rem; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; transition: all .2s;
+}
+.btn-admin-back:hover { background: rgba(255,255,255,.14); color: #f0e8d8; }
+
+.admin-content { max-width: 1100px; margin: 0 auto; padding: 36px 24px 80px; }
+
+/* Admin stat cards */
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 36px; }
+.astat {
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  padding: 20px 22px; transition: transform .15s;
+}
+.astat:hover { transform: translateY(-2px); }
+.astat-num { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); line-height: 1; margin-bottom: 4px; }
+.astat-lbl { font-size: .7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); }
+.astat.green .astat-num { color: var(--green); }
+.astat.red   .astat-num { color: var(--red); }
+
+/* Admin table */
+.admin-section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.admin-section-head h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 400; }
+
+.admin-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.admin-table {
+  width: 100%; border-collapse: collapse; font-size: .78rem;
+}
+.admin-table th {
+  background: #f1f5f9; padding: 11px 14px; text-align: left;
+  font-size: .62rem; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--mid); border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.admin-table td {
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  color: var(--text); vertical-align: middle;
+}
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: #f8fafc; }
+
+.btn-release {
+  background: none; border: 1px solid var(--red); border-radius: 4px;
+  padding: 5px 12px; color: var(--red);
+  font-family: 'Inter', sans-serif; font-size: .68rem; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.btn-release:hover { background: var(--red); color: #fff; }
+.btn-release:disabled { opacity: .5; cursor: not-allowed; }
+
+.pay-badge { padding: 2px 9px; border-radius: 99px; font-size: .6rem; letter-spacing: .5px; text-transform: uppercase; }
+.pay-badge.success  { background: var(--green-bg); color: var(--green); }
+.pay-badge.advance  { background: var(--yellow-bg); color: #5a6a00; }
+.pay-badge.cash     { background: rgba(100,116,139,.12); color: var(--dark3); }
+.pay-badge.failed   { background: var(--red-bg); color: var(--red); }
+
+.admin-empty { text-align: center; padding: 40px; color: var(--light); font-size: .85rem; }
+
+@keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
 </style>
 </head>
 <body>
+
+<!-- ══════════════════════ LOGIN OVERLAY ══════════ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">T</div>
+      <div>
+        <div class="login-logo-text">TVUC Hotel</div>
+        <div class="login-logo-sub">Official Booking Portal</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="login-tabs">
+      <div class="login-tab active" id="tab-login" onclick="switchLoginTab('login')">Sign In</div>
+      <div class="login-tab" id="tab-register" onclick="switchLoginTab('register')">New Guest</div>
+    </div>
+
+    <div id="login-err" class="login-err"></div>
+
+    <!-- Login form -->
+    <div id="lf-login">
+      <div class="lf"><label>Email Address</label><input type="email" id="li-email" placeholder="priya@example.com" /></div>
+      <button class="btn-login-primary" onclick="doLogin()">Enter Hotel →</button>
+      <div class="login-divider">OR</div>
+      <button class="btn-guest" onclick="continueAsGuest()">👁 Browse as Guest <span style="font-size:.7rem;opacity:.6">(view only)</span></button>
+      <p class="login-note">No password needed. We recognise you by your email.</p>
+      <div class="admin-toggle"><a onclick="switchLoginTab('admin')">Admin access</a></div>
+    </div>
+
+    <!-- Register form -->
+    <div id="lf-register" style="display:none">
+      <div class="lf"><label>Full Name</label><input type="text" id="li-reg-name" placeholder="Priya Sharma" /></div>
+      <div class="lf"><label>Email Address</label><input type="email" id="li-reg-email" placeholder="priya@example.com" /></div>
+      <div class="lf"><label>Phone</label><input type="tel" id="li-reg-phone" placeholder="+91 98765 43210" /></div>
+      <button class="btn-login-primary" onclick="doRegister()">Create Account & Enter →</button>
+      <div class="login-divider">OR</div>
+      <button class="btn-guest" onclick="continueAsGuest()">👁 Browse as Guest</button>
+      <p class="login-note">Your details are saved for quick booking.</p>
+    </div>
+
+    <!-- Admin form -->
+    <div id="lf-admin" style="display:none">
+      <div class="lf"><label>Admin Email</label><input type="email" id="li-adm-email" placeholder="admin@tvuc.com" /></div>
+      <div class="lf"><label>Password</label><input type="password" id="li-adm-pass" placeholder="••••••••" /></div>
+      <button class="btn-login-primary" style="background:linear-gradient(135deg,#1e293b,#334155)" onclick="doAdminLogin()">Admin Login →</button>
+      <div class="login-divider">OR</div>
+      <button class="btn-guest" onclick="switchLoginTab('login')">← Back to Guest Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
 
 <!-- ═══════════════════════════════ NAVBAR ═══ -->
 <nav id="navbar">
@@ -746,11 +1059,21 @@ footer {
       <div class="nav-tag">Official Booking Portal</div>
     </div>
   </div>
-  <div class="nav-links">
+  <div class="nav-links" id="main-nav-links">
     <a href="#book-section">Rooms</a>
     <a href="#reviews-section">Reviews</a>
-    <a href="#reservations-section">My Bookings</a>
-    <a href="#book-section" class="nav-cta">Book Now</a>
+    <a href="#my-bookings-section" id="nav-my-bookings" style="display:none">My Bookings</a>
+    <a href="javascript:void(0)" id="nav-admin-link" style="display:none" onclick="openAdminPanel()">⚙ Admin</a>
+    <a href="#book-section" class="nav-cta" id="nav-book-now">Book Now</a>
+  </div>
+  <!-- User pill -->
+  <div id="user-pill">
+    <div class="up-avatar" id="up-avatar">?</div>
+    <div>
+      <div class="up-name" id="up-name">Guest</div>
+      <div class="up-role" id="up-role">Guest</div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Logout</button>
   </div>
 </nav>
 
@@ -844,6 +1167,12 @@ footer {
       <div class="leg"><div class="leg-dot sl"></div>Selected</div>
       <div class="leg"><div class="leg-dot bk"></div>Booked</div>
     </div>
+
+    <!-- Guest Banner -->
+    <div id="guest-banner">
+      👁 You are browsing as a <strong>Guest</strong> — rooms are view-only.
+      <button onclick="showLoginOverlay()">Login to Book</button>
+    </div>
     <!-- Building view toggle -->
     <div style="text-align:center;margin-bottom:8px;display:flex;gap:8px;justify-content:center">
       <button class="btn-reset" onclick="snapBuilding('front')" id="btn-front" style="border-color:var(--gold);color:var(--gold)">&#9664; Front Rooms</button>
@@ -929,11 +1258,27 @@ footer {
     </div>
   </div>
 
-  <!-- RESERVATIONS -->
-  <div id="reservations-section">
+  <!-- MY BOOKINGS (logged-in users) -->
+  <div id="my-bookings-section">
+    <div class="res-head">
+      <h2 id="my-bookings-title">My Bookings</h2>
+      <button class="btn-sm" onclick="loadMyBookings()">&#8635; Refresh</button>
+    </div>
+    <!-- Populated when logged in -->
+    <div id="my-bl-grid"></div>
+    <!-- Shown to guests -->
+    <div id="my-bookings-login-prompt" style="display:none">
+      <div class="prompt-icon">🔒</div>
+      <p>Please log in to view your reservations.</p>
+      <button onclick="showLoginOverlay()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ALL RESERVATIONS (admin only – hidden for others) -->
+  <div id="reservations-section" style="display:none; margin-bottom:60px">
     <div class="res-head">
       <h2>All Reservations</h2>
-      <button class="btn-sm" onclick="loadBookings()">↻ Refresh</button>
+      <button class="btn-sm" onclick="loadBookings()">&#8635; Refresh</button>
     </div>
     <div id="bl-grid"></div>
   </div>
@@ -1034,6 +1379,52 @@ footer {
   </div>
 
 </main>
+
+<!-- ═════════════════════════ ADMIN PANEL ═════ -->
+<div id="admin-panel">
+  <div class="admin-topbar">
+    <h2>⚙&#xFE0F; Admin Panel — TVUC Hotel</h2>
+    <div class="admin-topbar-right">
+      <span style="font-size:.72rem;color:rgba(240,232,216,.4);letter-spacing:1px" id="admin-logged-as"></span>
+      <button class="btn-admin-back" onclick="closeAdminPanel()">← Back to Hotel</button>
+    </div>
+  </div>
+  <div class="admin-content">
+    <!-- Stat Cards -->
+    <div class="admin-stats">
+      <div class="astat"><div class="astat-num" id="astat-total">—</div><div class="astat-lbl">Total Rooms</div></div>
+      <div class="astat green"><div class="astat-num" id="astat-avail">—</div><div class="astat-lbl">Available</div></div>
+      <div class="astat red"><div class="astat-num" id="astat-booked">—</div><div class="astat-lbl">Booked</div></div>
+      <div class="astat"><div class="astat-num" id="astat-bookings">—</div><div class="astat-lbl">Total Bookings</div></div>
+    </div>
+    <!-- All Bookings Table -->
+    <div class="admin-section-head">
+      <h3>All Reservations</h3>
+      <button class="btn-sm" onclick="loadAdminData()">↻ Refresh</button>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Ref #</th>
+            <th>Guest</th>
+            <th>Email</th>
+            <th>Room</th>
+            <th>Type</th>
+            <th>View</th>
+            <th>Check-In</th>
+            <th>Check-Out</th>
+            <th>Nights</th>
+            <th>Amount</th>
+            <th>Payment</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody"><tr><td colspan="12" class="admin-empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════ PAYMENT MODAL ═ -->
 <div id="pay-overlay">
@@ -1178,9 +1569,9 @@ let bookingData = null;   // stored after successful booking
 
 // ── Init ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
   setDefaultDates();
   loadRooms();
-  loadBookings();
   loadReviews();
   initDrag();
   setStar(5);
@@ -1300,7 +1691,7 @@ function makeRoomEl(room) {
       <div class="tip-r"><span class="tip-k">Balcony</span><span class="tip-v">${room.balcony==='yes'?'✓ Yes':'✗ No'}</span></div>
       <div class="tip-r"><span class="tip-k">Smoking</span><span class="tip-v">${room.smoking==='yes'?'🚬 Yes':'🚶 No'}</span></div>
     </div>`;
-  if (room.status === 'available') el.addEventListener('click', () => selectRoom(room));
+  if (room.status === 'available') el.addEventListener('click', () => onRoomClick(room));
   return el;
 }
 
@@ -1319,6 +1710,14 @@ function selectRoom(room) {
 
   const chips = [room.room_type, `${room.view_type} view`, room.balcony==='yes'?'balcony':'', room.smoking==='yes'?'smoking':'non-smoking'].filter(Boolean);
   document.getElementById('rc-badges').innerHTML = chips.map(c => `<span class="badge-chip">${c}</span>`).join('');
+
+  // Pre-fill guest info from saved session
+  const u = getUser();
+  if (u && u.role !== 'guest') {
+    if (u.name)  document.getElementById('g-name').value  = u.name;
+    if (u.email) document.getElementById('g-email').value = u.email;
+    if (u.phone) document.getElementById('g-phone').value = u.phone;
+  }
 
   document.getElementById('booking-panel').classList.add('open');
   document.getElementById('booking-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
@@ -1761,6 +2160,359 @@ function clearBpMsg() { const e = document.getElementById('bp-msg'); e.textConte
 const style = document.createElement('style');
 style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
 document.head.appendChild(style);
+
+// ══════════════════════════════════════════════════════
+//  AUTH — localStorage-based session
+// ══════════════════════════════════════════════════════
+const ADMIN_EMAIL = 'admin@tvuc.com';
+const ADMIN_PASS  = 'admin123';
+
+function getUser()       { try { return JSON.parse(localStorage.getItem('tvuc_user') || 'null'); } catch(e){ return null; } }
+function setUser(u)      { localStorage.setItem('tvuc_user', JSON.stringify(u)); }
+function clearUser()     { localStorage.removeItem('tvuc_user'); }
+
+function initAuth() {
+  const u = getUser();
+  if (!u) {
+    // Show login overlay
+    showLoginOverlay();
+  } else {
+    hideLoginOverlay();
+    applyAuthState(u);
+  }
+}
+
+function applyAuthState(u) {
+  const isAdmin = u.role === 'admin';
+  const isGuest = u.role === 'guest';
+  const isUser  = u.role === 'user';
+
+  // Update navbar pill
+  const pill = document.getElementById('user-pill');
+  pill.classList.add('show');
+  const initials = u.name ? u.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : '👁';
+  document.getElementById('up-avatar').textContent = initials;
+  document.getElementById('up-name').textContent   = u.name || 'Guest';
+  document.getElementById('up-role').textContent   = isAdmin ? 'Admin' : isGuest ? 'Browsing as Guest' : 'Guest';
+
+  // Show/hide nav links
+  document.getElementById('nav-my-bookings').style.display = isUser  ? '' : 'none';
+  document.getElementById('nav-admin-link').style.display  = isAdmin ? '' : 'none';
+  document.getElementById('nav-book-now').style.display    = isGuest ? 'none' : '';
+
+  // Guest banner
+  document.getElementById('guest-banner').classList.toggle('show', isGuest);
+
+  // My Bookings section
+  const mbGrid  = document.getElementById('my-bl-grid');
+  const mbPrompt= document.getElementById('my-bookings-login-prompt');
+  if (isGuest) {
+    mbGrid.innerHTML  = '';
+    mbPrompt.style.display = 'block';
+    mbGrid.style.display   = 'none';
+  } else {
+    mbPrompt.style.display = 'none';
+    mbGrid.style.display   = '';
+    loadMyBookings();
+  }
+
+  // Admin-only: show All Reservations in main area
+  const resSec = document.getElementById('reservations-section');
+  if (isAdmin) {
+    resSec.style.display = '';
+    loadBookings();
+  } else {
+    resSec.style.display = 'none';
+  }
+
+  // Also update review form author name
+  if (u.name) {
+    const rvName = document.getElementById('rv-name');
+    if (rvName && !rvName.value) rvName.value = u.name;
+  }
+}
+
+function showLoginOverlay() {
+  document.getElementById('login-overlay').classList.remove('hidden');
+}
+function hideLoginOverlay() {
+  const ov = document.getElementById('login-overlay');
+  ov.classList.add('hidden');
+  setTimeout(() => ov.style.display = 'none', 450);
+}
+
+// ── Login Tab Switcher ────────────────────────
+function switchLoginTab(tab) {
+  document.getElementById('lf-login').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('lf-register').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('lf-admin').style.display    = tab === 'admin'    ? '' : 'none';
+
+  ['tab-login','tab-register'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const activeTab = document.getElementById('tab-' + tab);
+  if (activeTab) activeTab.classList.add('active');
+
+  document.getElementById('login-err').classList.remove('show');
+}
+
+// ── Show Login Error ──────────────────────────
+function showLoginErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// ── Sign In (existing user by email) ─────────
+function doLogin() {
+  const email = document.getElementById('li-email').value.trim().toLowerCase();
+  if (!email) { showLoginErr('Please enter your email address.'); return; }
+  // Fetch customer info from DB
+  fetch(`${API}/bookings/user/${encodeURIComponent(email)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        const b = data[0];
+        const u = { name: b.customer_name, email: b.customer_email, phone: b.customer_phone || '', role: 'user' };
+        setUser(u);
+        hideLoginOverlay();
+        applyAuthState(u);
+        showToast(`Welcome back, ${u.name.split(' ')[0]}! 🎉`);
+      } else {
+        // First time — redirect to register tab with the email pre-filled
+        document.getElementById('li-reg-email').value = email;
+        switchLoginTab('register');
+        showLoginErr('No bookings found for this email. Create an account below.');
+      }
+    })
+    .catch(() => {
+      // If API unreachable allow offline login with just name
+      const u = { name: email.split('@')[0], email, phone: '', role: 'user' };
+      setUser(u);
+      hideLoginOverlay();
+      applyAuthState(u);
+      showToast('Logged in (offline mode).');
+    });
+}
+
+// ── Register (new user) ───────────────────────
+function doRegister() {
+  const name  = document.getElementById('li-reg-name').value.trim();
+  const email = document.getElementById('li-reg-email').value.trim().toLowerCase();
+  const phone = document.getElementById('li-reg-phone').value.trim();
+  if (!name)  { showLoginErr('Please enter your full name.'); return; }
+  if (!email) { showLoginErr('Please enter your email address.'); return; }
+  const u = { name, email, phone, role: 'user' };
+  setUser(u);
+  hideLoginOverlay();
+  applyAuthState(u);
+  showToast(`Welcome to TVUC Hotel, ${name.split(' ')[0]}! 🏨`);
+}
+
+// ── Admin Login ───────────────────────────────
+function doAdminLogin() {
+  const email = document.getElementById('li-adm-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('li-adm-pass').value;
+  if (email !== ADMIN_EMAIL || pass !== ADMIN_PASS) {
+    showLoginErr('Invalid admin credentials.');
+    return;
+  }
+  const u = { name: 'Admin', email: ADMIN_EMAIL, phone: '', role: 'admin' };
+  setUser(u);
+  hideLoginOverlay();
+  applyAuthState(u);
+  showToast('Welcome, Admin! ⚙️');
+}
+
+// ── Guest Mode ────────────────────────────────
+function continueAsGuest() {
+  const u = { name: 'Guest', email: '', phone: '', role: 'guest' };
+  setUser(u);
+  hideLoginOverlay();
+  applyAuthState(u);
+}
+
+// ── Logout ────────────────────────────────────
+function doLogout() {
+  clearUser();
+  // Close admin panel if open
+  closeAdminPanel();
+  // Reset pill
+  document.getElementById('user-pill').classList.remove('show');
+  document.getElementById('guest-banner').classList.remove('show');
+  document.getElementById('nav-my-bookings').style.display = 'none';
+  document.getElementById('nav-admin-link').style.display  = 'none';
+  document.getElementById('nav-book-now').style.display    = '';
+  document.getElementById('reservations-section').style.display = 'none';
+  // Clear My Bookings
+  document.getElementById('my-bl-grid').innerHTML = '';
+  document.getElementById('my-bookings-login-prompt').style.display = 'block';
+  // Show login overlay
+  showLoginOverlay();
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('login-overlay').classList.remove('hidden');
+}
+
+// ── Gate room clicking to auth state ─────────
+function onRoomClick(room) {
+  const u = getUser();
+  if (!u || u.role === 'guest') {
+    showToast('🔒 Login to book rooms');
+    return;
+  }
+  selectRoom(room);
+}
+
+// ══════════════════════════════════════════════════════
+//  MY BOOKINGS
+// ══════════════════════════════════════════════════════
+async function loadMyBookings() {
+  const u = getUser();
+  const grid = document.getElementById('my-bl-grid');
+  if (!u || u.role === 'guest' || !u.email) return;
+
+  if (u.role === 'admin') {
+    document.getElementById('my-bookings-title').textContent = 'All Reservations (Overview)';
+  }
+
+  grid.innerHTML = '<div class="bl-empty">Loading…</div>';
+  try {
+    let url = u.role === 'admin'
+      ? `${API}/bookings`
+      : `${API}/bookings/user/${encodeURIComponent(u.email)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    grid.innerHTML = '';
+    if (!data.length) {
+      grid.innerHTML = `<div class="bl-empty">No reservations found${u.role !== 'admin' ? ' for your email' : ''}. Book your first room above!</div>`;
+      return;
+    }
+    data.forEach(b => {
+      const nights = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
+      const card   = document.createElement('div');
+      card.className = 'bcard';
+      const payLabel = { success:'Paid', advance:'30% Advance', cash:'Cash @ Hotel', failed:'Failed' }[b.payment_status] || b.payment_status;
+      card.innerHTML = `
+        <div class="bcard-head">
+          <div class="bcard-room">Room ${esc(b.room_number)}</div>
+          <span class="status-badge ${b.payment_status||'success'}">${payLabel}</span>
+        </div>
+        <div class="brow"><span class="bk">Guest</span><span class="bv">${esc(b.customer_name)}</span></div>
+        <div class="brow"><span class="bk">Check-In</span><span class="bv">${b.check_in}</span></div>
+        <div class="brow"><span class="bk">Check-Out</span><span class="bv">${b.check_out}</span></div>
+        <div class="brow"><span class="bk">Nights</span><span class="bv">${nights}</span></div>
+        <div class="brow"><span class="bk">Type</span><span class="bv" style="text-transform:capitalize">${b.room_type}</span></div>
+        <div class="brow"><span class="bk">Paid</span><span class="bv amt">₹${fmt(b.amount)}</span></div>
+        <div class="brow"><span class="bk">Ref #</span><span class="bv" style="color:var(--light)">${b.booking_id}</span></div>`;
+      grid.appendChild(card);
+    });
+  } catch(e) {
+    grid.innerHTML = `<div class="bl-empty" style="color:var(--red)">Could not load reservations.</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  ADMIN PANEL
+// ══════════════════════════════════════════════════════
+function openAdminPanel() {
+  const u = getUser();
+  if (!u || u.role !== 'admin') return;
+  document.getElementById('admin-panel').classList.add('open');
+  document.getElementById('admin-logged-as').textContent = `Logged in as ${u.email}`;
+  loadAdminData();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeAdminPanel() {
+  document.getElementById('admin-panel').classList.remove('open');
+}
+
+async function loadAdminData() {
+  // Load room stats
+  try {
+    const res  = await fetch(`${API}/rooms`);
+    const data = await res.json();
+    const total  = data.length;
+    const avail  = data.filter(r => r.status === 'available').length;
+    const booked = data.filter(r => r.status === 'booked').length;
+    document.getElementById('astat-total').textContent  = total;
+    document.getElementById('astat-avail').textContent  = avail;
+    document.getElementById('astat-booked').textContent = booked;
+  } catch(e) { /* ignore */ }
+
+  // Load all bookings into table
+  const tbody = document.getElementById('admin-tbody');
+  tbody.innerHTML = '<tr><td colspan="12" class="admin-empty">Loading…</td></tr>';
+  try {
+    const res  = await fetch(`${API}/bookings`);
+    const data = await res.json();
+    document.getElementById('astat-bookings').textContent = data.length;
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="12" class="admin-empty">No bookings yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(b => {
+      const nights = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
+      const payClass = { success:'success', advance:'advance', cash:'cash', failed:'failed' }[b.payment_status] || 'success';
+      const payLabel = { success:'Paid', advance:'Advance', cash:'Cash', failed:'Failed' }[b.payment_status] || b.payment_status;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:500;color:var(--light)">#${b.booking_id}</td>
+        <td style="font-weight:500">${esc(b.customer_name)}</td>
+        <td style="color:var(--mid);font-size:.72rem">${esc(b.customer_email)}</td>
+        <td style="font-weight:600">${esc(b.room_number)}</td>
+        <td style="text-transform:capitalize">${b.room_type}</td>
+        <td style="text-transform:capitalize">${b.view_type}</td>
+        <td>${b.check_in}</td>
+        <td>${b.check_out}</td>
+        <td style="text-align:center">${nights}</td>
+        <td style="color:var(--gold);font-weight:600">₹${fmt(b.amount)}</td>
+        <td><span class="pay-badge ${payClass}">${payLabel}</span></td>
+        <td><button class="btn-release" id="rel-btn-${b.booking_id}" onclick="releaseRoom(${b.room_id}, ${b.booking_id}, this)">Release</button></td>`;
+      tbody.appendChild(tr);
+    });
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="12" class="admin-empty" style="color:var(--red)">Could not load bookings.</td></tr>`;
+  }
+}
+
+async function releaseRoom(roomId, bookingId, btn) {
+  if (!confirm(`Release Room? This will cancel the booking #${bookingId} and mark the room as available.`)) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const res  = await fetch(`${API}/rooms/${roomId}/release`, { method: 'PATCH' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Room released successfully!');
+      loadAdminData();
+      loadRooms();         // refresh the 3D building too
+      loadMyBookings();
+    } else {
+      showToast('❌ ' + (data.error || 'Could not release room.'));
+      btn.disabled = false;
+      btn.textContent = 'Release';
+    }
+  } catch(e) {
+    showToast('❌ Network error.');
+    btn.disabled = false;
+    btn.textContent = 'Release';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════
+let _toastTimer;
+function showToast(msg, duration = 3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+}
 </script>
 
 </body>

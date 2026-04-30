@@ -442,6 +442,84 @@ def simulate_deadlock():
 
 
 # ══════════════════════════════════════════════════════════
+#  PATCH /rooms/<room_id>/release  (Admin: release a room)
+#  Marks the room status back to 'available' and removes
+#  any future bookings for that room.
+# ══════════════════════════════════════════════════════════
+@app.route("/rooms/<int:room_id>/release", methods=["PATCH"])
+def release_room(room_id):
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        conn.start_transaction()
+
+        # Check room exists
+        cursor.execute("SELECT * FROM rooms WHERE room_id = %s FOR UPDATE", (room_id,))
+        room = cursor.fetchone()
+        if not room:
+            conn.rollback()
+            return jsonify({"error": "Room not found."}), 404
+
+        # Delete future/active bookings for this room
+        cursor.execute("""
+            DELETE FROM bookings
+            WHERE room_id = %s AND check_out >= CURDATE()
+        """, (room_id,))
+
+        # Mark room as available
+        cursor.execute(
+            "UPDATE rooms SET status = 'available' WHERE room_id = %s",
+            (room_id,)
+        )
+        conn.commit()
+        return jsonify({"success": True, "room_id": room_id, "status": "available"}), 200
+
+    except Error as e:
+        if conn: conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  GET /bookings/user/<email>  — bookings for one customer
+# ══════════════════════════════════════════════════════════
+@app.route("/bookings/user/<path:email>", methods=["GET"])
+def get_user_bookings(email):
+    query = """
+        SELECT b.booking_id, b.check_in, b.check_out, b.booking_date,
+               c.name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
+               r.room_number, r.floor_number, r.room_type, r.price, r.view_type,
+               p.amount, p.payment_status
+        FROM bookings b
+        JOIN customers c ON c.customer_id = b.customer_id
+        JOIN rooms     r ON r.room_id     = b.room_id
+        LEFT JOIN payments p ON p.booking_id = b.booking_id
+        WHERE LOWER(c.email) = LOWER(%s)
+        ORDER BY b.booking_date DESC
+    """
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, (email.strip(),))
+        rows = cursor.fetchall()
+        for row in rows:
+            for k, v in row.items():
+                if isinstance(v, (date, datetime)):
+                    row[k] = str(v)
+                elif hasattr(v, "__class__") and v.__class__.__name__ == "Decimal":
+                    row[k] = float(v)
+        return jsonify(rows), 200
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
 #  Main
 # ══════════════════════════════════════════════════════════
 if __name__ == "__main__":
