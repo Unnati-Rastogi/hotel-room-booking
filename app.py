@@ -158,7 +158,7 @@ def book_room():
 
     # ── Payment Simulation (skip for cash) ───────────────
     if payment_method in ("full_card", "advance_card"):
-        payment_ok = random.random() > 0.10
+        payment_ok = True
         if not payment_ok:
             return jsonify({
                 "error": f"Payment declined for card ending ····{card_last4}. "
