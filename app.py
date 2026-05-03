@@ -93,6 +93,31 @@ def ensure_reviews_table():
         except Exception: pass
 
 
+def ensure_bookings_columns():
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        # Add columns for guests and breakfast if they don't exist
+        columns = [
+            ("adults", "INT NOT NULL DEFAULT 1"),
+            ("children", "INT NOT NULL DEFAULT 0"),
+            ("breakfast_opt", "BOOLEAN NOT NULL DEFAULT 0"),
+            ("breakfast_days", "INT NOT NULL DEFAULT 0"),
+        ]
+        for col_name, col_def in columns:
+            try:
+                cursor.execute(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_def}")
+                conn.commit()
+            except Error:
+                pass  # column already exists
+        print("Bookings table columns verified.")
+    except Error as e:
+        print(f"Warning: Could not update bookings table: {e}")
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
 # ══════════════════════════════════════════════════════════
 #  SERVE FRONTEND  — http://127.0.0.1:5000
 # ══════════════════════════════════════════════════════════
@@ -153,6 +178,10 @@ def book_room():
     room_id        = int(data["room_id"])
     check_in       = data["check_in"]
     check_out      = data["check_out"]
+    adults         = int(data.get("adults", 1))
+    children       = int(data.get("children", 0))
+    breakfast_opt  = bool(data.get("breakfast_opt", False))
+    breakfast_days = int(data.get("breakfast_days", 0))
     card_last4     = str(data.get("card_last4", "0000"))[-4:]
     payment_method = data.get("payment_method", "full_card")  # full_card | advance_card | cash
 
@@ -213,14 +242,19 @@ def book_room():
 
         # 6. Insert booking
         cursor.execute("""
-            INSERT INTO bookings (customer_id, room_id, check_in, check_out)
-            VALUES (%s, %s, %s, %s)
-        """, (customer_id, room_id, check_in, check_out))
+            INSERT INTO bookings (customer_id, room_id, check_in, check_out, adults, children, breakfast_opt, breakfast_days)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (customer_id, room_id, check_in, check_out, adults, children, 1 if breakfast_opt else 0, breakfast_days))
         booking_id = cursor.lastrowid
 
         # 7. Insert payment based on method
         nights     = (co - ci).days
-        full_amount = float(room["price"]) * nights
+        room_total = float(room["price"]) * nights
+        breakfast_total = 0
+        if breakfast_opt:
+            breakfast_total = 500 * (adults + children) * breakfast_days
+        
+        full_amount = room_total + breakfast_total
         if payment_method == "advance_card":
             paid_amount    = round(full_amount * 0.30, 2)
             payment_status = "advance"
@@ -520,8 +554,7 @@ def get_user_bookings(email):
 
 
 # ══════════════════════════════════════════════════════════
-#  Main
-# ══════════════════════════════════════════════════════════
 if __name__ == "__main__":
     ensure_reviews_table()
+    ensure_bookings_columns()
     app.run(debug=True, port=5000)

@@ -1240,6 +1240,27 @@ footer {
         </div>
 
         <div class="f-section">
+          <div class="f-title">Guests & Preferences</div>
+          <div class="form-grid two">
+            <div class="fld"><label>Adults (13+)</label><input type="number" id="g-adults" value="1" min="1" onchange="calcPrice()" /></div>
+            <div class="fld"><label>Children</label><input type="number" id="g-children" value="0" min="0" onchange="calcPrice()" /></div>
+          </div>
+          <div class="fld" style="margin-top:10px">
+            <label>Breakfast Option (₹500/person/day)</label>
+            <select id="g-breakfast" onchange="toggleBreakfastDays(); calcPrice()">
+              <option value="none">No Breakfast</option>
+              <option value="all">Breakfast for all days</option>
+              <option value="custom">Custom days</option>
+            </select>
+          </div>
+          <div id="breakfast-days-wrap" class="fld" style="margin-top:10px; display:none">
+            <label>Number of Breakfast Days</label>
+            <input type="number" id="g-bf-days" value="1" min="1" onchange="calcPrice()" />
+          </div>
+          <div style="font-size: .65rem; color: var(--red); margin-top: 6px; opacity: 0.8;">* Breakfast amount is non-refundable.</div>
+        </div>
+
+        <div class="f-section">
           <div class="f-title">Stay Dates</div>
           <div class="form-grid two">
             <div class="fld"><label>Check-In</label><input type="date" id="ci" onchange="calcPrice()" /></div>
@@ -1711,6 +1732,12 @@ function closePanel() {
   document.getElementById('price-preview').classList.remove('show');
 }
 
+function toggleBreakfastDays() {
+  const opt = document.getElementById('g-breakfast').value;
+  const wrap = document.getElementById('breakfast-days-wrap');
+  wrap.style.display = opt === 'custom' ? 'block' : 'none';
+}
+
 // ── Price Calculator ───────────────────────────
 function calcPrice() {
   const pp = document.getElementById('price-preview');
@@ -1720,9 +1747,36 @@ function calcPrice() {
   if (!ci || !co) { pp.classList.remove('show'); return; }
   const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
   if (nights <= 0) { pp.classList.remove('show'); return; }
-  document.getElementById('pp-desc').textContent  = `Room ${selected.room_number} × ${nights} night${nights>1?'s':''}`;
-  document.getElementById('pp-rate').textContent  = `₹${fmt(selected.price)}/night`;
-  document.getElementById('pp-total').textContent = `₹${fmt(nights * selected.price)}`;
+
+  // Room total
+  const roomTotal = nights * selected.price;
+
+  // Breakfast total
+  const adults = parseInt(document.getElementById('g-adults').value) || 0;
+  const children = parseInt(document.getElementById('g-children').value) || 0;
+  const totalGuests = adults + children;
+  const bfOpt = document.getElementById('g-breakfast').value;
+  
+  let bfDays = 0;
+  if (bfOpt === 'all') bfDays = nights;
+  else if (bfOpt === 'custom') {
+    bfDays = parseInt(document.getElementById('g-bf-days').value) || 0;
+    // Cap at nights
+    if (bfDays > nights) {
+      bfDays = nights;
+      document.getElementById('g-bf-days').value = nights;
+    }
+  }
+
+  const bfTotal = 500 * totalGuests * bfDays;
+  const grandTotal = roomTotal + bfTotal;
+
+  document.getElementById('pp-desc').innerHTML = `
+    Room ${selected.room_number} × ${nights} night${nights>1?'s':''}: ₹${fmt(roomTotal)}<br>
+    ${bfOpt !== 'none' ? `Breakfast for ${totalGuests} guests × ${bfDays} day${bfDays>1?'s':''}: ₹${fmt(bfTotal)} <small style="color:var(--red)">(Non-refundable)</small>` : ''}
+  `;
+  document.getElementById('pp-rate').textContent  = '';
+  document.getElementById('pp-total').textContent = `₹${fmt(grandTotal)}`;
   pp.classList.add('show');
 }
 
@@ -1742,10 +1796,25 @@ function openPayment() {
   if (new Date(co) <= new Date(ci)) { showBpMsg('Check-out must be after check-in.', 'err'); return; }
 
   const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
-  const total  = nights * selected.price;
+  
+  // Calculate total including breakfast
+  const adults = parseInt(document.getElementById('g-adults').value) || 0;
+  const children = parseInt(document.getElementById('g-children').value) || 0;
+  const bfOpt = document.getElementById('g-breakfast').value;
+  let bfDays = 0;
+  if (bfOpt === 'all') bfDays = nights;
+  else if (bfOpt === 'custom') {
+    bfDays = parseInt(document.getElementById('g-bf-days').value) || 0;
+    if (bfDays > nights) {
+      showBpMsg(`Breakfast days cannot exceed stay duration (${nights} nights).`, 'err');
+      return;
+    }
+  }
+  
+  const total = (nights * selected.price) + (500 * (adults + children) * bfDays);
 
   // fill payment modal info
-  document.getElementById('pm-room-info').textContent   = `Room ${selected.room_number} · ${nights} night${nights>1?'s':''}`;
+  document.getElementById('pm-room-info').textContent   = `Room ${selected.room_number} · ${nights} night${nights>1?'s':''} · ${adults+children} guest${adults+children>1?'s':''}`;
   document.getElementById('pm-total-show').textContent  = `₹${fmt(total)}`;
   document.getElementById('pm-total-show').setAttribute('data-raw', total);
   document.getElementById('pm-full-amt').textContent    = `₹${fmt(total)}`;
@@ -1872,11 +1941,19 @@ async function processPayment() {
     const email = document.getElementById('g-email').value.trim();
     const phone = document.getElementById('g-phone').value.trim();
 
+    const adults = parseInt(document.getElementById('g-adults').value) || 1;
+    const children = parseInt(document.getElementById('g-children').value) || 0;
+    const bfOpt = document.getElementById('g-breakfast').value;
+    let bfDays = 0;
+    if (bfOpt === 'all') bfDays = Math.round((new Date(co) - new Date(ci)) / 86400000);
+    else if (bfOpt === 'custom') bfDays = parseInt(document.getElementById('g-bf-days').value) || 0;
+
     const res  = await fetch(`${API}/book`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, phone, room_id: selected.room_id,
-        check_in: ci, check_out: co, card_last4, payment_method: method })
+        check_in: ci, check_out: co, card_last4, payment_method: method,
+        adults, children, breakfast_opt: bfOpt !== 'none', breakfast_days: bfDays })
     });
     const data = await res.json();
 
