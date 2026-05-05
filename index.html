@@ -1590,6 +1590,14 @@ footer {
 <script>
 const API = 'http://127.0.0.1:5000';
 
+// ── Safe UI Helpers ──
+const setT = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+const setH = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+const setV = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+const setD = (id, disp) => { const el = document.getElementById(id); if (el) el.style.display = disp; };
+const getV = (id) => document.getElementById(id)?.value || '';
+const getT = (id) => document.getElementById(id)?.textContent || '';
+
 // ── State ──────────────────────────────────────
 let rooms    = [];
 let selected = null;
@@ -1721,7 +1729,7 @@ function makeRoomEl(room) {
     <div class="tip">
       <div class="tip-r"><span class="tip-k">Room</span><span class="tip-v">${room.room_number} · Fl.${room.floor_number}</span></div>
       <div class="tip-r"><span class="tip-k">Type</span><span class="tip-v" style="text-transform:capitalize">${room.room_type}</span></div>
-      <div class="tip-r"><span class="tip-k">Price</span><span class="tip-v" style="color:var(--gold2)">₹${fmt(room.price)}/night</span></div>
+      <div class="tip-r"><span class="tip-k">Price</span><span class="tip-v" style="color:var(--gold2)">Rs.${fmt(room.price)}/night</span></div>
       <div class="tip-r"><span class="tip-k">View</span><span class="tip-v">${vie} ${room.view_type}</span></div>
       <div class="tip-r"><span class="tip-k">Balcony</span><span class="tip-v">${room.balcony==='yes'?'✓ Yes':'✗ No'}</span></div>
       <div class="tip-r"><span class="tip-k">Smoking</span><span class="tip-v">${room.smoking==='yes'?'🚬 Yes':'🚶 No'}</span></div>
@@ -1737,46 +1745,45 @@ function selectRoom(room) {
     if (p) { p.classList.remove('selected'); p.classList.add('available'); }
   }
   selected = room;
-  document.getElementById(`rm-${room.room_id}`).classList.replace('available', 'selected');
+  const sEl = document.getElementById(`rm-${room.room_id}`);
+  if (sEl) sEl.classList.replace('available', 'selected');
 
-  document.getElementById('panel-title').textContent = `Reserve Room ${room.room_number}`;
-  document.getElementById('rc-num').textContent = `Room ${room.room_number} · Floor ${room.floor_number}`;
-  document.getElementById('rc-price').innerHTML = `₹${fmt(room.price)} <small>/ night</small>`;
+  setT('panel-title', `Reserve Room ${room.room_number}`);
+  setT('rc-num', `Room ${room.room_number} · Floor ${room.floor_number}`);
+  setH('rc-price', `Rs.${fmt(room.price)} <small>/ night</small>`);
 
   const chips = [room.room_type, `${room.view_type} view`, room.balcony==='yes'?'balcony':'', room.smoking==='yes'?'smoking':'non-smoking'].filter(Boolean);
-  document.getElementById('rc-badges').innerHTML = chips.map(c => `<span class="badge-chip">${c}</span>`).join('');
+  setH('rc-badges', chips.map(c => `<span class="badge-chip">${c}</span>`).join(''));
 
-  // Pre-fill guest info — skip for admin (they book on behalf of guests)
   const u = getUser();
   if (u && u.role === 'user') {
-    if (u.name)  document.getElementById('g-name').value  = u.name;
-    if (u.email) document.getElementById('g-email').value = u.email;
-    if (u.phone) document.getElementById('g-phone').value = u.phone;
+    setV('g-name', u.name || '');
+    setV('g-email', u.email || '');
+    setV('g-phone', u.phone || '');
   } else if (u && u.role === 'admin') {
-    // Clear fields so admin can enter a guest's details
-    document.getElementById('g-name').value  = '';
-    document.getElementById('g-email').value = '';
-    document.getElementById('g-phone').value = '';
+    setV('g-name', ''); setV('g-email', ''); setV('g-phone', '');
   }
 
-  // Show only Cash option for admin bookings
   const isAdmin = u && u.role === 'admin';
-  document.getElementById('pm-opt-full').style.display    = isAdmin ? 'none' : '';
-  document.getElementById('pm-opt-advance').style.display = isAdmin ? 'none' : '';
-  document.getElementById('pm-opt-cash').style.display    = '';
-  document.getElementById('admin-booking-banner').style.display = isAdmin ? 'block' : 'none';
+  setD('admin-booking-banner', isAdmin ? 'block' : 'none');
+  setD('pm-opt-full', isAdmin ? 'none' : 'block');
+  setD('pm-opt-advance', isAdmin ? 'none' : 'block');
+  
   if (isAdmin) {
-    // Force-select cash
-    document.querySelector('input[name="pay_method"][value="cash"]').checked = true;
+    const cashRadio = document.querySelector('input[name="pay_method"][value="cash"]');
+    if (cashRadio) cashRadio.checked = true;
     if (typeof onPayMethodChange === 'function') onPayMethodChange();
   } else {
-    // Reset to full card for regular users
-    document.querySelector('input[name="pay_method"][value="full_card"]').checked = true;
+    const fullRadio = document.querySelector('input[name="pay_method"][value="full_card"]');
+    if (fullRadio) fullRadio.checked = true;
     if (typeof onPayMethodChange === 'function') onPayMethodChange();
   }
 
-  document.getElementById('booking-panel').classList.add('open');
-  document.getElementById('booking-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  const panel = document.getElementById('booking-panel');
+  if (panel) {
+    panel.classList.add('open');
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
   clearBpMsg(); calcPrice();
   loadRelatedReviews(room.room_type, room.view_type);
 }
@@ -1800,42 +1807,38 @@ function toggleBreakfastDays() {
 // ── Price Calculator ───────────────────────────
 function calcPrice() {
   const pp = document.getElementById('price-preview');
-  if (!selected) { pp.classList.remove('show'); return; }
-  const ci = document.getElementById('ci').value;
-  const co = document.getElementById('co').value;
+  if (!selected || !pp) return;
+  const ci = document.getElementById('ci')?.value;
+  const co = document.getElementById('co')?.value;
   if (!ci || !co) { pp.classList.remove('show'); return; }
   const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
   if (nights <= 0) { pp.classList.remove('show'); return; }
 
-  // Room total
-  const roomTotal = nights * selected.price;
-
-  // Breakfast total
-  const adults = parseInt(document.getElementById('g-adults').value) || 0;
-  const children = parseInt(document.getElementById('g-children').value) || 0;
+  const adults = parseInt(document.getElementById('g-adults')?.value) || 0;
+  const children = parseInt(document.getElementById('g-children')?.value) || 0;
   const totalGuests = adults + children;
-  const bfOpt = document.getElementById('g-breakfast').value;
+  const bfOpt = document.getElementById('g-breakfast')?.value;
   
   let bfDays = 0;
   if (bfOpt === 'all') bfDays = nights;
   else if (bfOpt === 'custom') {
-    bfDays = parseInt(document.getElementById('g-bf-days').value) || 0;
-    // Cap at nights
+    bfDays = parseInt(document.getElementById('g-bf-days')?.value) || 0;
     if (bfDays > nights) {
       bfDays = nights;
-      document.getElementById('g-bf-days').value = nights;
+      setV('g-bf-days', nights);
     }
   }
 
+  const roomTotal = nights * selected.price;
   const bfTotal = 500 * totalGuests * bfDays;
   const grandTotal = roomTotal + bfTotal;
 
-  document.getElementById('pp-desc').innerHTML = `
-    Room ${selected.room_number} × ${nights} night${nights>1?'s':''}: ₹${fmt(roomTotal)}<br>
-    ${bfOpt !== 'none' ? `Breakfast for ${totalGuests} guests × ${bfDays} day${bfDays>1?'s':''}: ₹${fmt(bfTotal)} <small style="color:var(--red)">(Non-refundable)</small>` : ''}
-  `;
-  document.getElementById('pp-rate').textContent  = '';
-  document.getElementById('pp-total').textContent = `₹${fmt(grandTotal)}`;
+  setH('pp-desc', `
+    Room ${selected.room_number} × ${nights} night${nights>1?'s':''}: Rs.${fmt(roomTotal)}<br>
+    ${bfOpt !== 'none' ? `Breakfast for ${totalGuests} guests × ${bfDays} day${bfDays>1?'s':''}: Rs.${fmt(bfTotal)} <small style="color:var(--red)">(Non-refundable)</small>` : ''}
+  `);
+  setT('pp-rate', '');
+  setT('pp-total', `Rs.${fmt(grandTotal)}`);
   pp.classList.add('show');
 }
 
@@ -1844,53 +1847,37 @@ function openPayment() {
   clearBpMsg();
   if (!selected) return;
 
-  const name  = document.getElementById('g-name').value.trim();
-  const phone = document.getElementById('g-phone').value.trim();
-  const email = document.getElementById('g-email').value.trim();
-  const ci    = document.getElementById('ci').value;
-  const co    = document.getElementById('co').value;
+  const name  = document.getElementById('g-name')?.value.trim();
+  const email = document.getElementById('g-email')?.value.trim();
+  const ci    = document.getElementById('ci')?.value;
+  const co    = document.getElementById('co')?.value;
 
-  if (!name || !phone || !email) { showBpMsg('Please fill in all guest information.', 'err'); return; }
-  if (!ci || !co) { showBpMsg('Please select check-in and check-out dates.', 'err'); return; }
-  if (new Date(co) <= new Date(ci)) { showBpMsg('Check-out must be after check-in.', 'err'); return; }
+  if (!name || !email) { showBpMsg('Please fill in required guest details.', 'err'); return; }
+  if (!ci || !co || new Date(co) <= new Date(ci)) { showBpMsg('Invalid stay dates.', 'err'); return; }
 
   const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
-  
-  // Calculate total including breakfast
-  const adults = parseInt(document.getElementById('g-adults').value) || 0;
-  const children = parseInt(document.getElementById('g-children').value) || 0;
-  const bfOpt = document.getElementById('g-breakfast').value;
-  let bfDays = 0;
-  if (bfOpt === 'all') bfDays = nights;
-  else if (bfOpt === 'custom') {
-    bfDays = parseInt(document.getElementById('g-bf-days').value) || 0;
-    if (bfDays > nights) {
-      showBpMsg(`Breakfast days cannot exceed stay duration (${nights} nights).`, 'err');
-      return;
-    }
-  }
+  const adults = parseInt(document.getElementById('g-adults')?.value) || 0;
+  const children = parseInt(document.getElementById('g-children')?.value) || 0;
+  const bfOpt = document.getElementById('g-breakfast')?.value;
+  let bfDays = (bfOpt === 'all') ? nights : parseInt(document.getElementById('g-bf-days')?.value) || 0;
   
   const total = (nights * selected.price) + (500 * (adults + children) * bfDays);
 
-  // fill payment modal info
-  document.getElementById('pm-room-info').textContent   = `Room ${selected.room_number} · ${nights} night${nights>1?'s':''} · ${adults+children} guest${adults+children>1?'s':''}`;
-  document.getElementById('pm-total-show').textContent  = `₹${fmt(total)}`;
-  document.getElementById('pm-total-show').setAttribute('data-raw', total);
-  document.getElementById('pm-full-amt').textContent    = `₹${fmt(total)}`;
-  document.getElementById('pm-adv-amt').textContent     = `₹${fmt(total * 0.3)}`;
-  document.getElementById('btn-pay-amt').textContent    = `₹${fmt(total)}`;
-  document.getElementById('pm-card-name').value = name;
-  document.getElementById('cv-holder').textContent = name.toUpperCase();
+  setT('pm-room-info', `Room ${selected.room_number} · ${nights} night${nights>1?'s':''} · ${adults+children} guest${adults+children>1?'s':''}`);
+  setT('pm-total-show', `Rs.${fmt(total)}`);
+  const totalShow = document.getElementById('pm-total-show');
+  if (totalShow) totalShow.setAttribute('data-raw', total);
+  
+  setT('pm-full-amt', `Rs.${fmt(total)}`);
+  setT('pm-adv-amt', `Rs.${fmt(total * 0.3)}`);
+  setT('btn-pay-amt', `Rs.${fmt(total)}`);
+  setV('pm-card-name', name);
+  setT('cv-holder', name.toUpperCase());
 
-  // ensure default option is full_card
-  const fullRadio = document.querySelector('input[name="pay_method"][value="full_card"]');
-  if (fullRadio) fullRadio.checked = true;
-  if (typeof onPayMethodChange === 'function') onPayMethodChange();
-
-  // reset to form view
-  document.getElementById('pay-form-view').style.display = 'block';
-  document.getElementById('pay-result').classList.remove('show');
-  document.getElementById('pay-overlay').classList.add('open');
+  setD('pay-form-view', 'flex');
+  setD('pm-step-1', 'block');
+  setD('pm-step-2', 'none');
+  document.getElementById('pay-overlay')?.classList.add('open');
 }
 
 function closePaymentModal() {
@@ -1920,7 +1907,6 @@ function onPayMethodChange() {
   const btnNext = document.getElementById('btn-next-step');
   const btnPay = document.getElementById('btn-pay');
 
-  // Update styles for the options
   const styles = [
     { id: 'pm-opt-full', val: 'full_card' },
     { id: 'pm-opt-advance', val: 'advance_card' },
@@ -1939,15 +1925,19 @@ function onPayMethodChange() {
   });
 
   if (isCash) {
-    btnNext.innerHTML = 'Confirm Booking';
-    btnNext.onclick = processPayment;
+    if (btnNext) {
+      btnNext.innerHTML = 'Confirm Booking';
+      btnNext.onclick = processPayment;
+    }
   } else {
-    const totalRaw = parseFloat(document.getElementById('pm-total-show').getAttribute('data-raw') || 0);
+    const totalRaw = parseFloat(document.getElementById('pm-total-show')?.getAttribute('data-raw') || 0);
     const isAdv = method === 'advance_card';
     const amt = isAdv ? totalRaw * 0.3 : totalRaw;
-    btnNext.innerHTML = `Continue to Card Details <span id="btn-next-amt">₹${fmt(amt)}</span>`;
-    btnNext.onclick = goToPaymentStep2;
-    btnPay.innerHTML = `Pay ₹${fmt(amt)}`;
+    if (btnNext) {
+      btnNext.innerHTML = `Continue to Card Details <span id="btn-next-amt">Rs.${fmt(amt)}</span>`;
+      btnNext.onclick = goToPaymentStep2;
+    }
+    if (btnPay) btnPay.innerHTML = `Pay Rs.${fmt(amt)}`;
   }
 }
 
@@ -1971,41 +1961,35 @@ function updateCardVisual() {
 
 // ── Process Payment ────────────────────────────
 async function processPayment() {
-  const method   = (document.querySelector('input[name="pay_method"]:checked') || {}).value || 'full_card';
-  const isCash   = method === 'cash';
+  const method = document.querySelector('input[name="pay_method"]:checked')?.value || 'full_card';
+  const isCash = method === 'cash';
   let card_last4 = '0000';
 
   if (!isCash) {
-    const cardNum  = document.getElementById('pm-card-num').value.replace(/\s/g,'');
-    const cardName = document.getElementById('pm-card-name').value.trim();
-    const expiry   = document.getElementById('pm-expiry').value.trim();
-    const cvv      = document.getElementById('pm-cvv').value.trim();
-    if (cardNum.length < 16) { alert('Please enter a valid 16-digit card number.'); return; }
-    if (!cardName)           { alert('Please enter the cardholder name.'); return; }
-    if (expiry.length < 4)   { alert('Please enter a valid expiry date.'); return; }
-    if (cvv.length < 3)      { alert('Please enter a valid CVV.'); return; }
+    const cardNum = document.getElementById('pm-card-num')?.value.replace(/\s/g,'');
+    const cardName = document.getElementById('pm-card-name')?.value.trim();
+    if (!cardNum || cardNum.length < 16) { alert('Please enter a valid 16-digit card number.'); return; }
+    if (!cardName) { alert('Please enter the cardholder name.'); return; }
     card_last4 = cardNum.slice(-4);
   }
 
-  const btn = document.getElementById('btn-pay');
-  btn.disabled = true;
-  btn.innerHTML = '<div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block"></div> Processing…';
-
-  await new Promise(r => setTimeout(r, isCash ? 600 : 1800));
+  const btn = document.getElementById(isCash ? 'btn-next-step' : 'btn-pay');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Processing…';
+  }
 
   try {
-    const ci    = document.getElementById('ci').value;
-    const co    = document.getElementById('co').value;
-    const name  = document.getElementById('g-name').value.trim();
-    const email = document.getElementById('g-email').value.trim();
-    const phone = document.getElementById('g-phone').value.trim();
+    const ci    = getV('ci');
+    const co    = getV('co');
+    const name  = getV('g-name').trim();
+    const email = getV('g-email').trim();
+    const phone = getV('g-phone').trim();
 
-    const adults = parseInt(document.getElementById('g-adults').value) || 1;
-    const children = parseInt(document.getElementById('g-children').value) || 0;
-    const bfOpt = document.getElementById('g-breakfast').value;
-    let bfDays = 0;
-    if (bfOpt === 'all') bfDays = Math.round((new Date(co) - new Date(ci)) / 86400000);
-    else if (bfOpt === 'custom') bfDays = parseInt(document.getElementById('g-bf-days').value) || 0;
+    const adults = parseInt(getV('g-adults')) || 1;
+    const children = parseInt(getV('g-children')) || 0;
+    const bfOpt = getV('g-breakfast');
+    let bfDays = (bfOpt === 'all') ? Math.round((new Date(co) - new Date(ci)) / 86400000) : (parseInt(getV('g-bf-days')) || 0);
 
     const res  = await fetch(`${API}/book`, {
       method: 'POST',
@@ -2021,76 +2005,53 @@ async function processPayment() {
       showPaymentSuccess(data, card_last4);
       markRoomBooked(selected.room_id);
       selected = null;
-      loadBookings();
     } else {
-      showPaymentFail(data.error || 'Could not process payment.');
+      showPaymentFail(data.error || 'Payment failed.');
     }
   } catch(e) {
     showPaymentFail('Network error: ' + e.message);
   } finally {
-    const btn = isCash ? document.getElementById('btn-next-step') : document.getElementById('btn-pay');
-    btn.disabled = false;
-    onPayMethodChange(); // reset button text correctly
+    if (btn) btn.disabled = false;
+    onPayMethodChange();
   }
 }
 
 function showPaymentSuccess(data, card_last4) {
-  document.getElementById('pay-form-view').style.display = 'none';
+  setD('pay-form-view', 'none');
   const result = document.getElementById('pay-result');
-  const methodLabels = { full_card: '💳 Full Card Payment', advance_card: '💰 30% Advance (Card)', cash: '💵 Cash at Hotel' };
-  const methodLabel = methodLabels[data.payment_method] || 'Card';
   const isCash = data.payment_method === 'cash';
-  const isAdv  = data.payment_method === 'advance_card';
 
-  document.getElementById('pr-icon').textContent  = '✅';
-  document.getElementById('pr-title').textContent = isCash ? 'Booking Confirmed!' : 'Payment Confirmed!';
-  document.getElementById('pr-sub').textContent   = isCash
-    ? 'Your reservation is secured. Pay in cash at check-in.'
-    : 'Your booking is confirmed. A confirmation will be sent to your email.';
-  document.getElementById('pr-details').style.display = 'block';
-  document.getElementById('pr-details').innerHTML = `
+  setT('pr-icon', '✅');
+  setT('pr-title', isCash ? 'Booking Confirmed!' : 'Payment Confirmed!');
+  setT('pr-sub', isCash ? 'Your reservation is secured.' : 'Your booking is confirmed.');
+  
+  setD('pr-details', 'block');
+  setH('pr-details', `
     <div class="pr-row"><span class="pr-k">Booking Ref</span><span class="pr-v">#${data.booking_id}</span></div>
-    <div class="pr-row"><span class="pr-k">Room</span><span class="pr-v">${data.room} · Floor ${data.floor}</span></div>
-    <div class="pr-row"><span class="pr-k">Guest</span><span class="pr-v">${esc(data.customer)}</span></div>
+    <div class="pr-row"><span class="pr-k">Room</span><span class="pr-v">${data.room}</span></div>
     <div class="pr-row"><span class="pr-k">Check-In</span><span class="pr-v">${fmtDate(data.check_in)}</span></div>
     <div class="pr-row"><span class="pr-k">Check-Out</span><span class="pr-v">${fmtDate(data.check_out)}</span></div>
-    <div class="pr-row"><span class="pr-k">Nights</span><span class="pr-v">${data.nights}</span></div>
-    <div class="pr-row"><span class="pr-k">Payment</span><span class="pr-v">${methodLabel}</span></div>
-    ${!isCash ? `<div class="pr-row"><span class="pr-k">Card</span><span class="pr-v">•••• ${card_last4}</span></div>` : ''}
-    <div class="pr-row"><span class="pr-k">Paid Now</span><span class="pr-v amt">₹${fmt(data.amount)}</span></div>
-    ${isAdv ? `<div class="pr-row"><span class="pr-k">Balance at Hotel</span><span class="pr-v">₹${fmt(data.full_amount - data.amount)}</span></div>` : ''}
-    <div class="pr-row"><span class="pr-k">Status</span><span class="pr-v" style="color:var(--green)">${isCash ? 'Reserved ✓' : 'Payment Successful ✓'}</span></div>`;
-  result.classList.add('show');
-  // auto-fill review form
-  document.getElementById('rv-type').value = data.room_type || '';
-  if (data.view_type) document.getElementById('rv-view').value = data.view_type;
+    <div class="pr-row"><span class="pr-k">Total Paid</span><span class="pr-v amt">Rs.${fmt(data.amount)}</span></div>
+    <div class="pr-row"><span class="pr-k">Status</span><span class="pr-v" style="color:var(--green)">Confirmed ✓</span></div>
+  `);
+  
+  if (result) result.classList.add('show');
+  
   if (data.room) {
-    document.getElementById('rv-room').value = data.room;
-    const viewIco = { sea:'🌊', pool:'🏊', garden:'🌿', city:'🌃' }[data.view_type] || '';
-    document.getElementById('rv-room-banner-text').textContent =
-      `Room ${data.room}  ·  ${data.room_type || ''}  ${viewIco} ${data.view_type || ''} view`;
-    document.getElementById('rv-room-banner').style.display = 'flex';
+    setV('rv-room', data.room);
+    setD('rv-room-banner', 'flex');
+    setT('rv-room-banner-text', `Room ${data.room}`);
   }
 }
 
 function showPaymentFail(msg) {
-  document.getElementById('pay-form-view').style.display = 'none';
+  setD('pay-form-view', 'none');
   const result = document.getElementById('pay-result');
-  document.getElementById('pr-icon').textContent  = '❌';
-  document.getElementById('pr-title').textContent = 'Payment Declined';
-  document.getElementById('pr-sub').innerHTML     = `${esc(msg)}<br/><small style="color:var(--light)">Please try again with a different card.</small>`;
-  document.getElementById('pr-details').style.display = 'none';
-
-  // Add retry button
-  const retryBtn = document.getElementById('btn-pm-close');
-  retryBtn.textContent = 'Try Again';
-  retryBtn.onclick = () => {
-    document.getElementById('pay-form-view').style.display = 'block';
-    result.classList.remove('show');
-    retryBtn.textContent = 'Close';
-    retryBtn.onclick = closePaymentModal;
-  };
-  result.classList.add('show');
+  setT('pr-icon', '❌');
+  setT('pr-title', 'Payment Failed');
+  setT('pr-sub', msg);
+  setD('pr-details', 'none');
+  if (result) result.classList.add('show');
 }
 
 // ── Reviews ────────────────────────────────
@@ -2169,10 +2130,11 @@ function applyFilter() {
 }
 function onSlider() {
   const slider = document.getElementById('price-range');
-  const v   = parseInt(slider.value);
+  if (!slider) return;
+  const v = parseInt(slider.value);
   const pct = ((v-1000)/(10000-1000))*100;
   slider.style.background = `linear-gradient(to right, var(--gold) 0%, var(--gold) ${pct}%, var(--cream3) ${pct}%, var(--cream3) 100%)`;
-  document.getElementById('price-val').textContent = `₹${v.toLocaleString('en-IN')}`;
+  setT('price-val', `Rs.${v.toLocaleString('en-IN')}`);
   applyFilter();
 }
 function resetFilters() {
@@ -2180,7 +2142,7 @@ function resetFilters() {
   const slider = document.getElementById('price-range');
   slider.value = 10000;
   slider.style.background = `linear-gradient(to right, var(--gold) 100%, var(--cream3) 100%)`;
-  document.getElementById('price-val').textContent = '₹10,000';
+  document.getElementById('price-val').textContent = 'Rs.10,000';
   rooms.forEach(rm => { const el = document.getElementById(`rm-${rm.room_id}`); if(el) el.classList.remove('dim'); });
 }
 
@@ -2292,10 +2254,11 @@ function renderReviewCards(data, container) {
 }
 
 async function submitReview() {
-  const name        = document.getElementById('rv-name').value.trim();
-  const comment     = document.getElementById('rv-comment').value.trim();
-  const room_number = document.getElementById('rv-room').value.trim();
+  const name        = getV('rv-name').trim();
+  const comment     = getV('rv-comment').trim();
+  const room_number = getV('rv-room').trim();
   const msg         = document.getElementById('review-msg');
+  if (!msg) return;
 
   if (!name || !comment) {
     msg.textContent = 'Please enter your name and a comment.'; msg.className = 'err'; return;
@@ -2501,8 +2464,8 @@ function showLoginErr(msg) {
 
 // ── Sign In (existing user by email + password) ─────────
 async function doLogin() {
-  const email = document.getElementById('li-email').value.trim().toLowerCase();
-  const password = document.getElementById('li-pass').value.trim();
+  const email = getV('li-email').trim().toLowerCase();
+  const password = getV('li-pass').trim();
   
   if (!email) { showLoginErr('Please enter your email address.'); return; }
   if (!password) { showLoginErr('Please enter your password.'); return; }
@@ -2533,10 +2496,10 @@ async function doLogin() {
 
 // ── Register (new user) ───────────────────────
 async function doRegister() {
-  const name     = document.getElementById('li-reg-name').value.trim();
-  const email    = document.getElementById('li-reg-email').value.trim().toLowerCase();
-  const phone    = document.getElementById('li-reg-phone').value.trim();
-  const password = document.getElementById('li-reg-pass').value.trim();
+  const name     = getV('li-reg-name').trim();
+  const email    = getV('li-reg-email').trim().toLowerCase();
+  const phone    = getV('li-reg-phone').trim();
+  const password = getV('li-reg-pass').trim();
 
   if (!name)     { showLoginErr('Please enter your full name.'); return; }
   if (!email)    { showLoginErr('Please enter your email address.'); return; }
@@ -2569,8 +2532,8 @@ async function doRegister() {
 // ── Admin Login ───────────────────────────────
 // ── Admin Login ───────────────────────────────
 function doAdminLogin() {
-  const email = document.getElementById('li-adm-email').value.trim().toLowerCase();
-  const pass  = document.getElementById('li-adm-pass').value;
+  const email = getV('li-adm-email').trim().toLowerCase();
+  const pass  = getV('li-adm-pass');
   if (email !== ADMIN_EMAIL || pass !== ADMIN_PASS) {
     showLoginErr('Invalid admin credentials.');
     return;
@@ -2632,40 +2595,34 @@ function onRoomClick(room) {
 async function loadMyBookings() {
   const u = getUser();
   const grid = document.getElementById('my-bl-grid');
-  if (!u || u.role === 'guest' || !u.email) return;
+  if (!u || u.role === 'guest' || !grid) return;
 
   if (u.role === 'admin') {
-    document.getElementById('my-bookings-title').textContent = 'All Reservations (Overview)';
+    setT('my-bookings-title', 'All Reservations (Overview)');
   }
 
   grid.innerHTML = '<div class="bl-empty">Loading…</div>';
   try {
-    let url = u.role === 'admin'
-      ? `${API}/bookings`
-      : `${API}/bookings/user/${encodeURIComponent(u.email)}`;
+    let url = u.role === 'admin' ? `${API}/bookings` : `${API}/bookings/user/${encodeURIComponent(u.email)}`;
     const res  = await fetch(url);
     const data = await res.json();
     grid.innerHTML = '';
     if (!data.length) {
-      grid.innerHTML = `<div class="bl-empty">No reservations found${u.role !== 'admin' ? ' for your email' : ''}. Book your first room above!</div>`;
+      grid.innerHTML = `<div class="bl-empty">No reservations found. Book your first room above!</div>`;
       return;
     }
     data.forEach(b => {
-      const nights = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
-      const card   = document.createElement('div');
+      const card = document.createElement('div');
       card.className = 'bcard';
-      const payLabel = { success:'Paid', advance:'30% Advance', cash:'Cash @ Hotel', failed:'Failed' }[b.payment_status] || b.payment_status;
+      const payLabel = { success:'Paid', advance:'30% Advance', cash:'Cash @ Hotel', failed:'Failed' }[b.payment_status] || 'Paid';
       card.innerHTML = `
         <div class="bcard-head">
           <div class="bcard-room">Room ${esc(b.room_number)}</div>
           <span class="status-badge ${b.payment_status||'success'}">${payLabel}</span>
         </div>
-        <div class="brow"><span class="bk">Guest</span><span class="bv">${esc(b.customer_name)}</span></div>
         <div class="brow"><span class="bk">Check-In</span><span class="bv">${fmtDate(b.check_in)}</span></div>
         <div class="brow"><span class="bk">Check-Out</span><span class="bv">${fmtDate(b.check_out)}</span></div>
-        <div class="brow"><span class="bk">Nights</span><span class="bv">${nights}</span></div>
-        <div class="brow"><span class="bk">Type</span><span class="bv" style="text-transform:capitalize">${b.room_type}</span></div>
-        <div class="brow"><span class="bk">Paid</span><span class="bv amt">₹${fmt(b.amount)}</span></div>
+        <div class="brow"><span class="bk">Total</span><span class="bv amt">Rs.${fmt(b.amount)}</span></div>
         <div class="brow"><span class="bk">Ref #</span><span class="bv" style="color:var(--light)">${b.booking_id}</span></div>`;
       grid.appendChild(card);
     });
@@ -2711,41 +2668,31 @@ function toggleBookingHistory() {
 }
 
 async function loadAdminData() {
-  // Load room stats
   try {
     const res  = await fetch(`${API}/rooms`);
     const data = await res.json();
-    const total  = data.length;
-    const avail  = data.filter(r => r.status === 'available').length;
-    const booked = data.filter(r => r.status === 'booked').length;
-    document.getElementById('astat-total').textContent  = total;
-    document.getElementById('astat-avail').textContent  = avail;
-    document.getElementById('astat-booked').textContent = booked;
-  } catch(e) { /* ignore */ }
+    setT('astat-total', data.length);
+    setT('astat-avail', data.filter(r => r.status === 'available').length);
+    setT('astat-booked', data.filter(r => r.status === 'booked').length);
+  } catch(e) {}
 
-  // Load bookings into table
   const tbody = document.getElementById('admin-tbody');
+  if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="12" class="admin-empty">Loading…</td></tr>';
   try {
     const res  = await fetch(`${API}/bookings`);
     const data = await res.json();
-    document.getElementById('astat-bookings').textContent = data.length;
+    setT('astat-bookings', data.length);
     if (!data.length) {
       tbody.innerHTML = '<tr><td colspan="12" class="admin-empty">No bookings yet.</td></tr>';
       return;
     }
     tbody.innerHTML = '';
     data.forEach(b => {
-      const nights = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
-      const payClass = { success:'success', advance:'advance', cash:'cash', failed:'failed' }[b.payment_status] || 'success';
-      const payLabel = { success:'Paid', advance:'Advance', cash:'Cash', failed:'Failed' }[b.payment_status] || b.payment_status;
-      
-      const rid = b.room_id || 0; // fallback
-      const bid = b.booking_id || 0;
-
+      const payLabel = { success:'Paid', advance:'Advance', cash:'Cash', failed:'Failed' }[b.payment_status] || 'Paid';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-weight:500;color:var(--light)">#${bid}</td>
+        <td style="color:var(--light)">#${b.booking_id}</td>
         <td style="font-weight:500">${esc(b.customer_name)}</td>
         <td style="color:var(--mid);font-size:.72rem">${esc(b.customer_email)}</td>
         <td style="font-weight:600">${esc(b.room_number)}</td>
@@ -2753,65 +2700,32 @@ async function loadAdminData() {
         <td style="text-transform:capitalize">${b.view_type}</td>
         <td>${fmtDate(b.check_in)}</td>
         <td>${fmtDate(b.check_out)}</td>
-        <td style="text-align:center">${nights}</td>
-        <td style="color:var(--gold);font-weight:600">₹${fmt(b.amount)}</td>
-        <td><span class="pay-badge ${payClass}">${payLabel}</span></td>
-        <td><button class="btn-release" id="rel-btn-${bid}" onclick="releaseRoom(${rid}, ${bid}, this)">Release</button></td>`;
+        <td style="text-align:center">${Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000)}</td>
+        <td style="color:var(--gold);font-weight:600">Rs.${fmt(b.amount)}</td>
+        <td><span class="pay-badge success">${payLabel}</span></td>
+        <td><button class="btn-release" onclick="releaseRoom(${b.room_id}, ${b.booking_id}, this)">Release</button></td>`;
       tbody.appendChild(tr);
     });
 
-    // ── Populate Breakfast Orders section ─────────
     const bfGrid  = document.getElementById('bf-grid');
-    const bfEmpty = document.getElementById('bf-empty');
-    const bfSum   = document.getElementById('bf-summary');
-    bfGrid.innerHTML = '';
-
-    const bfOrders = data.filter(b => b.breakfast_opt);
-    if (!bfOrders.length) {
-      bfEmpty.style.display = 'block';
-      bfGrid.style.display  = 'none';
-      bfSum.textContent = '';
-    } else {
-      bfEmpty.style.display = 'none';
-      bfGrid.style.display  = 'grid';
-      const totalPeople = bfOrders.reduce((s, b) => s + (b.adults||0) + (b.children||0), 0);
-      const totalDays   = bfOrders.reduce((s, b) => s + (b.breakfast_days||0), 0);
-      bfSum.textContent = `${bfOrders.length} booking${bfOrders.length>1?'s':''} · ${totalPeople} guests · ${totalDays} total breakfast-days`;
-
+    if (bfGrid) {
+      bfGrid.innerHTML = '';
+      const bfOrders = data.filter(b => b.breakfast_opt);
+      setD('bf-empty', bfOrders.length ? 'none' : 'block');
+      setT('bf-summary', bfOrders.length ? `${bfOrders.length} bookings with breakfast` : '');
       bfOrders.forEach(b => {
-        const guests  = (b.adults||0) + (b.children||0);
-        const days    = b.breakfast_days || 0;
-        const bfCost  = 500 * guests * days;
-        const nights  = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
+        const guests = (b.adults||0) + (b.children||0);
+        const bfCost = 500 * guests * (b.breakfast_days||0);
         const card = document.createElement('div');
-        card.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)';
+        card.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
         card.innerHTML = `
-          <div style="background:linear-gradient(90deg,#f59e0b,#d97706);padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
-            <span style="color:#fff;font-family:'Playfair Display',serif;font-size:1rem">Room ${esc(b.room_number)}</span>
-            <span style="color:rgba(255,255,255,.85);font-size:.7rem;letter-spacing:1px;text-transform:uppercase">Breakfast</span>
-          </div>
-          <div style="padding:14px 16px;font-size:.8rem;display:flex;flex-direction:column;gap:7px">
-            <div style="font-weight:600;color:var(--text)">${esc(b.customer_name)}</div>
-            <div style="color:var(--mid);font-size:.72rem">${esc(b.customer_email)}</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-              <span style="background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:99px;font-size:.68rem;letter-spacing:.5px">
-                🧑 ${b.adults||0} Adult${(b.adults||0)!==1?'s':''} + 👶 ${b.children||0} Child${(b.children||0)!==1?'ren':''}
-              </span>
-              <span style="background:#ecfdf5;color:#065f46;padding:3px 9px;border-radius:99px;font-size:.68rem;letter-spacing:.5px">
-                📅 ${days} of ${nights} night${nights!==1?'s':''}
-              </span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
-              <span style="color:var(--mid);font-size:.7rem">#${b.booking_id} · ${fmtDate(b.check_in)} → ${fmtDate(b.check_out)}</span>
-              <span style="color:#d97706;font-weight:600;font-size:.85rem">₹${fmt(bfCost)}</span>
-            </div>
-          </div>`;
+          <div style="font-weight:600;margin-bottom:4px">Room ${esc(b.room_number)} — ${esc(b.customer_name)}</div>
+          <div style="font-size:.75rem;color:var(--mid)">${guests} guests · ${b.breakfast_days} days · Rs.${fmt(bfCost)}</div>`;
         bfGrid.appendChild(card);
       });
     }
-
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="12" class="admin-empty" style="color:var(--red)">Could not load bookings.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12" class="admin-empty" style="color:var(--red)">Error loading data.</td></tr>`;
   }
 }
 
@@ -2848,7 +2762,7 @@ function closeReleaseModal() {
 }
 
 async function confirmRelease() {
-  const pass = document.getElementById('release-pass-input').value;
+  const pass = getV('release-pass-input');
   const errEl = document.getElementById('release-err');
   
   if (!pass) { errEl.textContent = 'Please enter the admin password.'; return; }

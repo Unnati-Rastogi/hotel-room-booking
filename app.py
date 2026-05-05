@@ -376,14 +376,14 @@ def get_rooms():
 @app.route("/book", methods=["POST"])
 def book_room():
     data = request.get_json(force=True)
-    required = ["name", "email", "phone", "room_id", "check_in", "check_out"]
+    required = ["name", "email", "room_id", "check_in", "check_out"]
     for field in required:
         if not data.get(field):
             return jsonify({"error": f"Missing field: {field}"}), 400
 
     name           = data["name"].strip()
     email          = data["email"].strip().lower()
-    phone          = data["phone"].strip()
+    phone          = data.get("phone", "").strip()
     room_id        = int(data["room_id"])
     check_in       = data["check_in"]
     check_out      = data["check_out"]
