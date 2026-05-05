@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS customers (
     customer_id INT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(120) NOT NULL,
     email       VARCHAR(180) NOT NULL UNIQUE,
-    phone       VARCHAR(20)  NOT NULL
+    phone       VARCHAR(20)  NOT NULL,
+    password    VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ──────────────────────────────────────────────────────────

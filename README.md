@@ -1,41 +1,70 @@
-# TVUC Hotel Booking System
+# TVUC Smart Hotel Booking System
 
-A full-stack hotel booking application with a 3D building interface.
+A premium, full-stack hotel reservation platform featuring an interactive 3D building visualizer, real-time availability tracking, and a secure administration panel.
 
-## Prerequisites
-1.  **Python 3.8+** installed.
-2.  **MySQL Server** installed and running.
+## 🌟 Key Features
+- **3D Interactive Building**: Browse rooms by rotating a 3D model of the hotel.
+- **Smart Filtering**: Filter rooms by Floor, View (Sea, Pool, Garden, City), Type (Suite, Double, Single), and Price.
+- **Secure Booking**: Automated guest record management and payment simulation (Full, Advance, or Cash).
+- **Admin Dashboard**: Full control over reservations, bulk room release, and session security.
+- **Breakfast Service**: Optional breakfast tracking with automated fee calculation.
+- **Auto-Release**: Background scheduler automatically frees rooms once the check-out date passes.
+- **Guest Reviews**: Room-specific feedback system with context-aware auto-fill.
 
-## Setup Instructions
+---
 
-### 1. Install Dependencies
-Open your terminal in this folder and run:
+## 🛠️ Technology Stack
+- **Frontend**: Vanilla HTML5, CSS3, JavaScript (No frameworks).
+- **Backend**: Python 3.13+ with Flask.
+- **Database**: MySQL with triggers for status management.
+
+---
+
+## 🚀 Setup Instructions
+
+### 1. Prerequisites
+- **Python 3.8+**
+- **MySQL Server** installed and running.
+
+### 2. Install Dependencies
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 2. Configure Database
-1.  Open `app.py`, `reviews.py`, and `import_schema.py`.
-2.  Locate the `DB_CONFIG` (or `HOST`/`USER`/`PASSWORD`) section near the top of each file.
-3.  Ensure the `password` matches your local MySQL root password. (Default is `@R00t123` in the code).
-
-### 3. Initialize Database Schema
-Run the following command to create the database and tables:
-```powershell
-python import_schema.py
-```
+### 3. Database Configuration
+1. Open `app.py`.
+2. Update the `DB_CONFIG` section (lines 23-30) with your MySQL credentials:
+   ```python
+   DB_CONFIG = {
+       "host":     "localhost",
+       "user":     "root",
+       "password": "YOUR_PASSWORD_HERE",
+       "database": "hotel_booking",
+   }
+   ```
+3. Ensure you have a database named `hotel_booking` or let the app create it.
 
 ### 4. Start the Application
 Run the Flask server:
 ```powershell
 python app.py
 ```
+*Note: The app will automatically verify tables and columns on startup.*
 
 ### 5. Open in Browser
-Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to start booking rooms!
+Visit [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
 ---
 
-## Admin Credentials
+## 🔐 Admin Credentials
 - **Email**: `admin@tvuc.com`
 - **Password**: `admin123`
+
+---
+
+## 🎓 Academic Summary (For Evaluators)
+The system demonstrates advanced concepts including:
+1. **Relational Data Integrity**: Foreign keys between `bookings`, `payments`, and `rooms`.
+2. **Database Triggers**: `trg_after_booking_insert` handles automatic state transitions.
+3. **Multi-threaded Backend**: A daemon thread in Flask manages the auto-checkout logic.
+4. **CSS 3D Transforms**: Advanced UI rendering without external libraries like Three.js.

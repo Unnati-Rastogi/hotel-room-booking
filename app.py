@@ -118,6 +118,215 @@ def ensure_bookings_columns():
         except Exception: pass
 
 
+def ensure_customers_password():
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("ALTER TABLE customers ADD COLUMN password VARCHAR(255) NOT NULL DEFAULT 'pass123'")
+            conn.commit()
+            print("Customers table updated with password column.")
+        except Error:
+            pass  # column already exists
+    except Error as e:
+        print(f"Warning: Could not update customers table: {e}")
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+def ensure_sample_bookings():
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("SELECT COUNT(*) as count FROM bookings")
+        if cursor.fetchone()["count"] < 10:  # Seed more if we have few
+            print("Seeding more sample bookings...")
+            cursor.execute("SELECT customer_id FROM customers LIMIT 1")
+            cust = cursor.fetchone()
+            if not cust:
+                cursor.execute("INSERT INTO customers (name, email, phone, password) VALUES ('Sample Guest', 'guest@example.com', '9876543210', 'pass123')")
+                conn.commit()
+                cursor.execute("SELECT customer_id FROM customers WHERE email = 'guest@example.com'")
+                cust = cursor.fetchone()
+            
+            customer_id = cust["customer_id"]
+            
+            # Get rooms that are marked as 'booked' but don't have active bookings
+            cursor.execute("""
+                SELECT r.room_id FROM rooms r
+                LEFT JOIN bookings b ON b.room_id = r.room_id AND b.check_out >= CURDATE()
+                WHERE r.status = 'booked' AND b.booking_id IS NULL
+            """)
+            rooms_to_book = cursor.fetchall()
+            
+            today = date.today()
+            for r in rooms_to_book:
+                # Random check-in in the past/near future
+                cursor.execute("""
+                    INSERT INTO bookings (customer_id, room_id, check_in, check_out, adults, children)
+                    VALUES (%s, %s, %s, DATE_ADD(%s, INTERVAL 3 DAY), 1, 0)
+                """, (customer_id, r["room_id"], today, today))
+                
+                cursor.execute("SELECT LAST_INSERT_ID() as id")
+                bid = cursor.fetchone()["id"]
+                cursor.execute("INSERT INTO payments (booking_id, amount, payment_status) VALUES (%s, 7500.00, 'success')", (bid,))
+            
+            conn.commit()
+            print(f"Added {len(rooms_to_book)} more sample bookings.")
+            
+    except Error as e:
+        print(f"Warning: Could not seed sample bookings: {e}")
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  PATCH /rooms/release-all
+# ══════════════════════════════════════════════════════════
+@app.route("/rooms/release-all", methods=["PATCH"])
+def release_all_rooms():
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        conn.start_transaction()
+        # Must delete payments first (FK: payments.booking_id -> bookings.booking_id)
+        cursor.execute("""
+            DELETE p FROM payments p
+            JOIN bookings b ON b.booking_id = p.booking_id
+            WHERE b.check_out >= CURDATE()
+        """)
+        cursor.execute("DELETE FROM bookings WHERE check_out >= CURDATE()")
+        cursor.execute("UPDATE rooms SET status = 'available'")
+        conn.commit()
+        return jsonify({"success": True, "message": "All rooms released successfully."}), 200
+    except Error as e:
+        if conn: conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  GET /rooms/auto-release
+#  Trigger checkout-based auto-release from the frontend.
+#  Called on page load so expired rooms are freed immediately.
+# ══════════════════════════════════════════════════════════
+@app.route("/rooms/auto-release", methods=["GET"])
+def trigger_auto_release():
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT DISTINCT r.room_id, r.room_number
+            FROM rooms r
+            WHERE r.status = 'booked'
+              AND NOT EXISTS (
+                  SELECT 1 FROM bookings b
+                  WHERE b.room_id  = r.room_id
+                    AND b.check_out > CURDATE()
+              )
+        """)
+        expired = cursor.fetchall()
+
+        if expired:
+            conn.start_transaction()
+            ids = [r["room_id"] for r in expired]
+            fmt = ",".join(["%s"] * len(ids))
+            cursor.execute(
+                f"UPDATE rooms SET status = 'available' WHERE room_id IN ({fmt})", ids
+            )
+            conn.commit()
+            return jsonify({
+                "success": True,
+                "freed": len(ids),
+                "rooms": [r["room_number"] for r in expired]
+            }), 200
+        else:
+            return jsonify({"success": True, "freed": 0}), 200
+
+    except Error as e:
+        if conn:
+            try: conn.rollback()
+            except Exception: pass
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  POST /register
+# ══════════════════════════════════════════════════════════
+@app.route("/register", methods=["POST"])
+def register_user():
+    data = request.get_json(force=True)
+    name     = data.get("name", "").strip()
+    email    = data.get("email", "").strip().lower()
+    phone    = data.get("phone", "").strip()
+    password = data.get("password", "").strip()
+
+    if not name or not email or not password:
+        return jsonify({"error": "Name, email and password are required."}), 400
+
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO customers (name, email, phone, password)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE name=VALUES(name), phone=VALUES(phone), password=VALUES(password)
+        """, (name, email, phone, password))
+        conn.commit()
+        return jsonify({"success": True, "message": "User registered successfully."}), 201
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  POST /login
+# ══════════════════════════════════════════════════════════
+@app.route("/login", methods=["POST"])
+def login_user():
+    data = request.get_json(force=True)
+    email    = data.get("email", "").strip().lower()
+    password = data.get("password", "").strip()
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required."}), 400
+
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM customers WHERE email = %s AND password = %s", (email, password))
+        user = cursor.fetchone()
+        
+        if user:
+            return jsonify({
+                "success": True,
+                "user": {
+                    "name": user["name"],
+                    "email": user["email"],
+                    "phone": user["phone"],
+                    "role": "user"
+                }
+            }), 200
+        else:
+            return jsonify({"error": "Invalid email or password."}), 401
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
 # ══════════════════════════════════════════════════════════
 #  SERVE FRONTEND  — http://127.0.0.1:5000
 # ══════════════════════════════════════════════════════════
@@ -232,11 +441,18 @@ def book_room():
         if cursor.fetchone():
             conn.rollback(); return jsonify({"error": "Room is already booked for selected dates."}), 409
 
-        # 5. Upsert customer
-        cursor.execute("""
-            INSERT INTO customers (name, email, phone) VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE name = VALUES(name), phone = VALUES(phone)
-        """, (name, email, phone))
+        # 5. Upsert customer (handle password gracefully)
+        password = data.get("password", "").strip()
+        if password:
+            cursor.execute("""
+                INSERT INTO customers (name, email, phone, password) VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE name = VALUES(name), phone = VALUES(phone), password = VALUES(password)
+            """, (name, email, phone, password))
+        else:
+            cursor.execute("""
+                INSERT INTO customers (name, email, phone, password) VALUES (%s, %s, %s, 'pass123')
+                ON DUPLICATE KEY UPDATE name = VALUES(name), phone = VALUES(phone)
+            """, (name, email, phone))
         cursor.execute("SELECT customer_id FROM customers WHERE email = %s", (email,))
         customer_id = cursor.fetchone()["customer_id"]
 
@@ -307,16 +523,20 @@ def book_room():
 # ══════════════════════════════════════════════════════════
 @app.route("/bookings", methods=["GET"])
 def get_bookings():
-    query = """
+    show_all = request.args.get("all", "0") == "1"
+    where = "" if show_all else "WHERE b.check_out >= CURDATE()"
+    query = f"""
         SELECT b.booking_id, b.check_in, b.check_out, b.booking_date,
+               b.adults, b.children, b.breakfast_opt, b.breakfast_days,
                c.name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
-               r.room_number, r.floor_number, r.room_type, r.price, r.view_type,
+               r.room_id, r.room_number, r.floor_number, r.room_type, r.price, r.view_type,
                p.amount, p.payment_status
         FROM bookings b
         JOIN customers c ON c.customer_id = b.customer_id
         JOIN rooms     r ON r.room_id     = b.room_id
         LEFT JOIN payments p ON p.booking_id = b.booking_id
-        ORDER BY b.booking_date DESC
+        {where}
+        ORDER BY b.check_in ASC
     """
     try:
         conn   = get_connection()
@@ -495,11 +715,19 @@ def release_room(room_id):
             conn.rollback()
             return jsonify({"error": "Room not found."}), 404
 
-        # Delete future/active bookings for this room
+        # Get booking IDs for this room first
         cursor.execute("""
-            DELETE FROM bookings
+            SELECT booking_id FROM bookings
             WHERE room_id = %s AND check_out >= CURDATE()
         """, (room_id,))
+        booking_ids = [r["booking_id"] for r in cursor.fetchall()]
+
+        if booking_ids:
+            # Delete payments first (FK constraint)
+            fmt_ids = ",".join(["%s"] * len(booking_ids))
+            cursor.execute(f"DELETE FROM payments WHERE booking_id IN ({fmt_ids})", booking_ids)
+            # Then delete bookings
+            cursor.execute(f"DELETE FROM bookings WHERE booking_id IN ({fmt_ids})", booking_ids)
 
         # Mark room as available
         cursor.execute(
@@ -525,7 +753,7 @@ def get_user_bookings(email):
     query = """
         SELECT b.booking_id, b.check_in, b.check_out, b.booking_date,
                c.name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
-               r.room_number, r.floor_number, r.room_type, r.price, r.view_type,
+               r.room_id, r.room_number, r.floor_number, r.room_type, r.price, r.view_type,
                p.amount, p.payment_status
         FROM bookings b
         JOIN customers c ON c.customer_id = b.customer_id
@@ -552,9 +780,149 @@ def get_user_bookings(email):
         try: cursor.close(); conn.close()
         except Exception: pass
 
+# ══════════════════════════════════════════════════════════
+#  REVIEW UTILITIES  (merged from reviews.py)
+#  Admin/seeding helpers — not exposed as API routes.
+# ══════════════════════════════════════════════════════════
+import math as _math
+
+def insert_reviews(reviews_data):
+    """Insert reviews, auto-filling room_type & view_type from room_number.
+    reviews_data: list of (room_number, customer_name, comment, rating)
+    """
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        for room_num, name, comment, rating in reviews_data:
+            cursor.execute("SELECT room_type, view_type FROM rooms WHERE room_number = %s", (room_num,))
+            room  = cursor.fetchone()
+            rtype = room["room_type"] if room else ""
+            vtype = room["view_type"] if room else ""
+            r_int = int(_math.ceil(rating))
+            cursor.execute("""
+                INSERT INTO reviews (customer_name, rating, comment, room_type, view_type, room_number)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (name, r_int, comment, rtype, vtype, room_num))
+        conn.commit()
+        print(f"Inserted {len(reviews_data)} reviews.")
+    except Error as e:
+        print(f"Error inserting reviews: {e}")
+        if conn: conn.rollback()
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+def delete_reviews_not_in(names_to_keep):
+    """Delete reviews whose customer_name is NOT in the provided list."""
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        fmt    = ",".join(["%s"] * len(names_to_keep))
+        cursor.execute(f"DELETE FROM reviews WHERE customer_name NOT IN ({fmt})", tuple(names_to_keep))
+        conn.commit()
+        print(f"Deleted {cursor.rowcount} old reviews.")
+    except Error as e:
+        print(f"Error deleting reviews: {e}")
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+def sync_reviews_with_rooms():
+    """Update reviews.room_type/view_type to match the rooms table (backfill)."""
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE reviews rev
+            JOIN rooms rm ON rev.room_number = rm.room_number
+            SET rev.room_type = rm.room_type, rev.view_type = rm.view_type
+            WHERE rev.room_number != '' AND rev.room_number IS NOT NULL
+        """)
+        conn.commit()
+        print("Synced review types with rooms table.")
+    except Error as e:
+        print(f"Error syncing reviews: {e}")
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  AUTO-RELEASE SCHEDULER
+#  Runs in a daemon background thread every hour.
+#  Sets rooms to 'available' once their check_out date has passed.
+# ══════════════════════════════════════════════════════════
+
+def auto_release_rooms():
+    """Free any room whose latest booking check_out < today."""
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        conn.start_transaction()
+
+        # Rooms still marked 'booked' but with NO future/active booking
+        cursor.execute("""
+            SELECT DISTINCT r.room_id, r.room_number
+            FROM rooms r
+            WHERE r.status = 'booked'
+              AND NOT EXISTS (
+                  SELECT 1 FROM bookings b
+                  WHERE b.room_id  = r.room_id
+                    AND b.check_out > CURDATE()
+              )
+        """)
+        expired = cursor.fetchall()
+
+        if expired:
+            ids  = [r["room_id"]     for r in expired]
+            nums = [r["room_number"] for r in expired]
+            fmt  = ",".join(["%s"] * len(ids))
+            cursor.execute(
+                f"UPDATE rooms SET status = 'available' WHERE room_id IN ({fmt})",
+                ids
+            )
+            conn.commit()
+            print(f"[AutoRelease] {date.today()} — freed {len(ids)} room(s): {', '.join(nums)}")
+        else:
+            conn.rollback()
+
+    except Error as e:
+        print(f"[AutoRelease] Error: {e}")
+        if conn:
+            try: conn.rollback()
+            except Exception: pass
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+def _run_scheduler(interval=3600):
+    """Loop forever: release expired rooms, then sleep for interval seconds."""
+    while True:
+        auto_release_rooms()
+        time.sleep(interval)
+
 
 # ══════════════════════════════════════════════════════════
 if __name__ == "__main__":
     ensure_reviews_table()
     ensure_bookings_columns()
+    ensure_customers_password()
+    ensure_sample_bookings()
+
+    # Immediately release any rooms that already passed checkout
+    auto_release_rooms()
+
+    # Background thread: re-checks every hour (daemon exits with server)
+    t = threading.Thread(target=_run_scheduler, kwargs={"interval": 3600},
+                         daemon=True, name="AutoRelease")
+    t.start()
+    print("[AutoRelease] Scheduler started — checks every 1 hour.")
+
     app.run(debug=True, port=5000)

@@ -1024,10 +1024,11 @@ footer {
     <!-- Login form -->
     <div id="lf-login">
       <div class="lf"><label>Email Address</label><input type="email" id="li-email" placeholder="priya@example.com" /></div>
+      <div class="lf"><label>Password</label><input type="password" id="li-pass" placeholder="••••••••" /></div>
       <button class="btn-login-primary" onclick="doLogin()">Enter Hotel →</button>
       <div class="login-divider">OR</div>
       <button class="btn-guest" onclick="continueAsGuest()">👁 Browse as Guest <span style="font-size:.7rem;opacity:.6">(view only)</span></button>
-      <p class="login-note">No password needed. We recognise you by your email.</p>
+      <p class="login-note">Enter your email and password to access your bookings.</p>
       <div class="admin-toggle"><a onclick="switchLoginTab('admin')">Admin access</a></div>
     </div>
 
@@ -1036,6 +1037,7 @@ footer {
       <div class="lf"><label>Full Name</label><input type="text" id="li-reg-name" placeholder="Priya Sharma" /></div>
       <div class="lf"><label>Email Address</label><input type="email" id="li-reg-email" placeholder="priya@example.com" /></div>
       <div class="lf"><label>Phone</label><input type="tel" id="li-reg-phone" placeholder="+91 98765 43210" /></div>
+      <div class="lf"><label>Create Password</label><input type="password" id="li-reg-pass" placeholder="••••••••" /></div>
       <button class="btn-login-primary" onclick="doRegister()">Create Account & Enter →</button>
       <div class="login-divider">OR</div>
       <button class="btn-guest" onclick="continueAsGuest()">👁 Browse as Guest</button>
@@ -1218,6 +1220,10 @@ footer {
       <div class="bp-head">
         <h3 id="panel-title">Reserve Your Room</h3>
         <button class="close-btn" onclick="closePanel()">✕</button>
+      </div>
+      <!-- Admin mode banner -->
+      <div id="admin-booking-banner" style="display:none;background:linear-gradient(90deg,#1e293b,#0f172a);padding:10px 18px;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:#f0e8d8;border-bottom:1px solid rgba(255,255,255,.08);">
+        ⚙ Admin Mode · Enter Guest Details Below · Cash Only
       </div>
       <div class="bp-body">
         <div class="room-card">
@@ -1405,8 +1411,12 @@ footer {
     </div>
     <!-- All Bookings Table -->
     <div class="admin-section-head">
-      <h3>All Reservations</h3>
-      <button class="btn-sm" onclick="loadAdminData()">↻ Refresh</button>
+      <h3>All Reservations <span id="admin-table-mode" style="font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-left:8px">Active</span></h3>
+      <div style="display:flex;gap:10px">
+        <button class="btn-sm" id="btn-show-history" onclick="toggleBookingHistory()" style="border-color:var(--mid);color:var(--mid)">📋 Show History</button>
+        <button class="btn-sm" style="border-color:var(--red);color:var(--red)" onclick="releaseAllRooms()">✕ Release All</button>
+        <button class="btn-sm" onclick="loadAdminData()">↻ Refresh</button>
+      </div>
     </div>
     <div class="admin-table-wrap">
       <table class="admin-table">
@@ -1429,10 +1439,36 @@ footer {
         <tbody id="admin-tbody"><tr><td colspan="12" class="admin-empty">Loading…</td></tr></tbody>
       </table>
     </div>
+
+    <!-- ── Breakfast Orders Section ────────────────── -->
+    <div class="admin-section-head" style="margin-top:44px">
+      <h3>🍳 Breakfast Orders</h3>
+      <span id="bf-summary" style="font-size:.75rem;color:var(--mid);letter-spacing:.5px"></span>
+    </div>
+    <div id="bf-empty" style="display:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--light);font-size:.85rem">No breakfast orders in active bookings.</div>
+    <div id="bf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:60px"></div>
+
   </div>
 </div>
 
-<!-- ═══════════════════════════ PAYMENT MODAL ═ -->
+<!-- ═══════════════════ RELEASE CONFIRM MODAL ═══════════════════ -->
+<div id="release-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:36px 32px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:'Inter',sans-serif;">
+    <div style="font-size:2rem;text-align:center;margin-bottom:12px;">🔐</div>
+    <h3 id="release-modal-title" style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:400;text-align:center;margin-bottom:8px;color:#1a1a2e;">Confirm Release</h3>
+    <p id="release-modal-msg" style="color:#64748b;font-size:.82rem;text-align:center;margin-bottom:20px;line-height:1.6;"></p>
+    <label style="display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Admin Password</label>
+    <input id="release-pass-input" type="password" placeholder="Enter admin password…"
+      style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;font-family:'Inter',sans-serif;outline:none;margin-bottom:6px;"
+      onkeydown="if(event.key==='Enter')confirmRelease()">
+    <div id="release-err" style="color:#e74c3c;font-size:.75rem;margin-bottom:12px;min-height:16px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeReleaseModal()" style="flex:1;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;color:#64748b;font-family:'Inter',sans-serif;font-size:.8rem;cursor:pointer;letter-spacing:.5px;">Cancel</button>
+      <button onclick="confirmRelease()" id="release-confirm-btn" style="flex:2;padding:10px;border:none;border-radius:8px;background:#e74c3c;color:#fff;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.5px;">Release Room</button>
+    </div>
+  </div>
+</div>
+
 <div id="pay-overlay">
   <div id="pay-modal">
 
@@ -1572,6 +1608,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadReviews();
   initDrag();
   setStar(5);
+  // Trigger auto-release: free rooms whose checkout date has already passed
+  fetch(`${API}/rooms/auto-release`).catch(() => {});
 });
 
 function setDefaultDates() {
@@ -1708,12 +1746,33 @@ function selectRoom(room) {
   const chips = [room.room_type, `${room.view_type} view`, room.balcony==='yes'?'balcony':'', room.smoking==='yes'?'smoking':'non-smoking'].filter(Boolean);
   document.getElementById('rc-badges').innerHTML = chips.map(c => `<span class="badge-chip">${c}</span>`).join('');
 
-  // Pre-fill guest info from saved session
+  // Pre-fill guest info — skip for admin (they book on behalf of guests)
   const u = getUser();
-  if (u && u.role !== 'guest') {
+  if (u && u.role === 'user') {
     if (u.name)  document.getElementById('g-name').value  = u.name;
     if (u.email) document.getElementById('g-email').value = u.email;
     if (u.phone) document.getElementById('g-phone').value = u.phone;
+  } else if (u && u.role === 'admin') {
+    // Clear fields so admin can enter a guest's details
+    document.getElementById('g-name').value  = '';
+    document.getElementById('g-email').value = '';
+    document.getElementById('g-phone').value = '';
+  }
+
+  // Show only Cash option for admin bookings
+  const isAdmin = u && u.role === 'admin';
+  document.getElementById('pm-opt-full').style.display    = isAdmin ? 'none' : '';
+  document.getElementById('pm-opt-advance').style.display = isAdmin ? 'none' : '';
+  document.getElementById('pm-opt-cash').style.display    = '';
+  document.getElementById('admin-booking-banner').style.display = isAdmin ? 'block' : 'none';
+  if (isAdmin) {
+    // Force-select cash
+    document.querySelector('input[name="pay_method"][value="cash"]').checked = true;
+    if (typeof onPayMethodChange === 'function') onPayMethodChange();
+  } else {
+    // Reset to full card for regular users
+    document.querySelector('input[name="pay_method"][value="full_card"]').checked = true;
+    if (typeof onPayMethodChange === 'function') onPayMethodChange();
   }
 
   document.getElementById('booking-panel').classList.add('open');
@@ -1993,8 +2052,8 @@ function showPaymentSuccess(data, card_last4) {
     <div class="pr-row"><span class="pr-k">Booking Ref</span><span class="pr-v">#${data.booking_id}</span></div>
     <div class="pr-row"><span class="pr-k">Room</span><span class="pr-v">${data.room} · Floor ${data.floor}</span></div>
     <div class="pr-row"><span class="pr-k">Guest</span><span class="pr-v">${esc(data.customer)}</span></div>
-    <div class="pr-row"><span class="pr-k">Check-In</span><span class="pr-v">${data.check_in}</span></div>
-    <div class="pr-row"><span class="pr-k">Check-Out</span><span class="pr-v">${data.check_out}</span></div>
+    <div class="pr-row"><span class="pr-k">Check-In</span><span class="pr-v">${fmtDate(data.check_in)}</span></div>
+    <div class="pr-row"><span class="pr-k">Check-Out</span><span class="pr-v">${fmtDate(data.check_out)}</span></div>
     <div class="pr-row"><span class="pr-k">Nights</span><span class="pr-v">${data.nights}</span></div>
     <div class="pr-row"><span class="pr-k">Payment</span><span class="pr-v">${methodLabel}</span></div>
     ${!isCash ? `<div class="pr-row"><span class="pr-k">Card</span><span class="pr-v">•••• ${card_last4}</span></div>` : ''}
@@ -2144,8 +2203,8 @@ async function loadBookings() {
           <span class="status-badge ${b.payment_status||'success'}">${b.payment_status==='failed'?'Failed':'Paid'}</span>
         </div>
         <div class="brow"><span class="bk">Guest</span><span class="bv">${esc(b.customer_name)}</span></div>
-        <div class="brow"><span class="bk">Check-In</span><span class="bv">${b.check_in}</span></div>
-        <div class="brow"><span class="bk">Check-Out</span><span class="bv">${b.check_out}</span></div>
+        <div class="brow"><span class="bk">Check-In</span><span class="bv">${fmtDate(b.check_in)}</span></div>
+        <div class="brow"><span class="bk">Check-Out</span><span class="bv">${fmtDate(b.check_out)}</span></div>
         <div class="brow"><span class="bk">Nights</span><span class="bv">${nights}</span></div>
         <div class="brow"><span class="bk">Type</span><span class="bv" style="text-transform:capitalize">${b.room_type}</span></div>
         <div class="brow"><span class="bk">Total</span><span class="bv amt">₹${fmt(b.amount)}</span></div>
@@ -2286,8 +2345,9 @@ async function submitReview() {
 }
 
 // ── Helpers ────────────────────────────────────
-function fmt(n)  { return parseFloat(n).toLocaleString('en-IN', { maximumFractionDigits: 0 }); }
-function esc(s)  { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmt(n)     { return parseFloat(n).toLocaleString('en-IN', { maximumFractionDigits: 0 }); }
+function esc(s)     { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtDate(s) { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}-${m}-${y}`; }
 function showBpMsg(txt, cls) { const e = document.getElementById('bp-msg'); e.textContent = txt; e.className = cls; }
 function clearBpMsg() { const e = document.getElementById('bp-msg'); e.textContent = ''; e.className = ''; }
 
@@ -2308,8 +2368,44 @@ function clearUser()     { localStorage.removeItem('tvuc_user'); }
 
 function initAuth() {
   const u = getUser();
+  
+  // ── Session Timeout Logic ──────────────────────
+  const now = Date.now();
+  const loginTime = localStorage.getItem('tvuc_login_time');
+  const lastSeen  = localStorage.getItem('tvuc_last_seen');
+  
+  const FOUR_HOURS = 4 * 3600 * 1000;
+  const ONE_HOUR   = 1 * 3600 * 1000;
+
+  if (u && u.role !== 'guest') {
+    let shouldLogout = false;
+    
+    // Check total login duration
+    if (loginTime && (now - parseInt(loginTime) > FOUR_HOURS)) {
+      shouldLogout = true;
+      console.log("Session expired: 4 hours exceeded.");
+    }
+    // Check if tab was closed/inactive for > 1 hour
+    else if (lastSeen && (now - parseInt(lastSeen) > ONE_HOUR)) {
+      shouldLogout = true;
+      console.log("Session expired: Tab closed for more than 1 hour.");
+    }
+
+    if (shouldLogout) {
+      doLogout();
+      showToast('🔒 Session expired. Please log in again.');
+      return;
+    }
+  }
+
+  // Heartbeat to keep session alive
+  setInterval(() => {
+    if (getUser() && getUser().role !== 'guest') {
+      localStorage.setItem('tvuc_last_seen', Date.now());
+    }
+  }, 10000); // every 10s
+
   if (!u) {
-    // Show login overlay
     showLoginOverlay();
   } else {
     hideLoginOverlay();
@@ -2355,13 +2451,17 @@ function applyAuthState(u) {
   const resSec = document.getElementById('reservations-section');
   if (isAdmin) {
     resSec.style.display = '';
-    loadBookings();
+    loadAdminData();
   } else {
     resSec.style.display = 'none';
   }
 
-  // Also update review form author name
-  if (u.name) {
+  // Hide review form for admin (admins don't write reviews)
+  const reviewBox = document.getElementById('review-form-box');
+  if (reviewBox) reviewBox.style.display = isAdmin ? 'none' : '';
+
+  // Pre-fill review form author name for regular users only
+  if (u.name && !isAdmin) {
     const rvName = document.getElementById('rv-name');
     if (rvName && !rvName.value) rvName.value = u.name;
   }
@@ -2399,52 +2499,74 @@ function showLoginErr(msg) {
   el.classList.add('show');
 }
 
-// ── Sign In (existing user by email) ─────────
-function doLogin() {
+// ── Sign In (existing user by email + password) ─────────
+async function doLogin() {
   const email = document.getElementById('li-email').value.trim().toLowerCase();
+  const password = document.getElementById('li-pass').value.trim();
+  
   if (!email) { showLoginErr('Please enter your email address.'); return; }
-  // Fetch customer info from DB
-  fetch(`${API}/bookings/user/${encodeURIComponent(email)}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.length > 0) {
-        const b = data[0];
-        const u = { name: b.customer_name, email: b.customer_email, phone: b.customer_phone || '', role: 'user' };
-        setUser(u);
-        hideLoginOverlay();
-        applyAuthState(u);
-        showToast(`Welcome back, ${u.name.split(' ')[0]}! 🎉`);
-      } else {
-        // First time — redirect to register tab with the email pre-filled
-        document.getElementById('li-reg-email').value = email;
-        switchLoginTab('register');
-        showLoginErr('No bookings found for this email. Create an account below.');
-      }
-    })
-    .catch(() => {
-      // If API unreachable allow offline login with just name
-      const u = { name: email.split('@')[0], email, phone: '', role: 'user' };
+  if (!password) { showLoginErr('Please enter your password.'); return; }
+
+  try {
+    const res = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    
+    if (res.ok && data.success) {
+      const u = data.user;
       setUser(u);
+      localStorage.setItem('tvuc_login_time', Date.now());
+      localStorage.setItem('tvuc_last_seen', Date.now());
       hideLoginOverlay();
       applyAuthState(u);
-      showToast('Logged in (offline mode).');
-    });
+      showToast(`Welcome back, ${u.name.split(' ')[0]}! 🎉`);
+    } else {
+      showLoginErr(data.error || 'Invalid email or password.');
+    }
+  } catch(e) {
+    showLoginErr('Server unreachable. Please try again later.');
+  }
 }
 
 // ── Register (new user) ───────────────────────
-function doRegister() {
-  const name  = document.getElementById('li-reg-name').value.trim();
-  const email = document.getElementById('li-reg-email').value.trim().toLowerCase();
-  const phone = document.getElementById('li-reg-phone').value.trim();
-  if (!name)  { showLoginErr('Please enter your full name.'); return; }
-  if (!email) { showLoginErr('Please enter your email address.'); return; }
-  const u = { name, email, phone, role: 'user' };
-  setUser(u);
-  hideLoginOverlay();
-  applyAuthState(u);
-  showToast(`Welcome to TVUC Hotel, ${name.split(' ')[0]}! 🏨`);
+async function doRegister() {
+  const name     = document.getElementById('li-reg-name').value.trim();
+  const email    = document.getElementById('li-reg-email').value.trim().toLowerCase();
+  const phone    = document.getElementById('li-reg-phone').value.trim();
+  const password = document.getElementById('li-reg-pass').value.trim();
+
+  if (!name)     { showLoginErr('Please enter your full name.'); return; }
+  if (!email)    { showLoginErr('Please enter your email address.'); return; }
+  if (!password) { showLoginErr('Please create a password.'); return; }
+
+  try {
+    const res = await fetch(`${API}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      const u = { name, email, phone, role: 'user' };
+      setUser(u);
+      localStorage.setItem('tvuc_login_time', Date.now());
+      localStorage.setItem('tvuc_last_seen', Date.now());
+      hideLoginOverlay();
+      applyAuthState(u);
+      showToast(`Welcome to TVUC Hotel, ${name.split(' ')[0]}! 🏨`);
+    } else {
+      showLoginErr(data.error || 'Registration failed.');
+    }
+  } catch(e) {
+    showLoginErr('Server unreachable. Please try again later.');
+  }
 }
 
+// ── Admin Login ───────────────────────────────
 // ── Admin Login ───────────────────────────────
 function doAdminLogin() {
   const email = document.getElementById('li-adm-email').value.trim().toLowerCase();
@@ -2455,9 +2577,14 @@ function doAdminLogin() {
   }
   const u = { name: 'Admin', email: ADMIN_EMAIL, phone: '', role: 'admin' };
   setUser(u);
+  localStorage.setItem('tvuc_login_time', Date.now());
+  localStorage.setItem('tvuc_last_seen', Date.now());
   hideLoginOverlay();
   applyAuthState(u);
   showToast('Welcome, Admin! ⚙️');
+  
+  // Automatically open the admin panel as requested
+  setTimeout(() => openAdminPanel(), 500);
 }
 
 // ── Guest Mode ────────────────────────────────
@@ -2534,8 +2661,8 @@ async function loadMyBookings() {
           <span class="status-badge ${b.payment_status||'success'}">${payLabel}</span>
         </div>
         <div class="brow"><span class="bk">Guest</span><span class="bv">${esc(b.customer_name)}</span></div>
-        <div class="brow"><span class="bk">Check-In</span><span class="bv">${b.check_in}</span></div>
-        <div class="brow"><span class="bk">Check-Out</span><span class="bv">${b.check_out}</span></div>
+        <div class="brow"><span class="bk">Check-In</span><span class="bv">${fmtDate(b.check_in)}</span></div>
+        <div class="brow"><span class="bk">Check-Out</span><span class="bv">${fmtDate(b.check_out)}</span></div>
         <div class="brow"><span class="bk">Nights</span><span class="bv">${nights}</span></div>
         <div class="brow"><span class="bk">Type</span><span class="bv" style="text-transform:capitalize">${b.room_type}</span></div>
         <div class="brow"><span class="bk">Paid</span><span class="bv amt">₹${fmt(b.amount)}</span></div>
@@ -2563,6 +2690,26 @@ function closeAdminPanel() {
   document.getElementById('admin-panel').classList.remove('open');
 }
 
+let _showHistory = false;
+
+function toggleBookingHistory() {
+  _showHistory = !_showHistory;
+  const btn  = document.getElementById('btn-show-history');
+  const mode = document.getElementById('admin-table-mode');
+  if (_showHistory) {
+    btn.textContent  = '📋 Active Only';
+    btn.style.color  = 'var(--gold)';
+    btn.style.borderColor = 'var(--gold)';
+    mode.textContent = 'All History';
+  } else {
+    btn.textContent  = '📋 Show History';
+    btn.style.color  = 'var(--mid)';
+    btn.style.borderColor = 'var(--mid)';
+    mode.textContent = 'Active';
+  }
+  loadAdminData();
+}
+
 async function loadAdminData() {
   // Load room stats
   try {
@@ -2576,7 +2723,7 @@ async function loadAdminData() {
     document.getElementById('astat-booked').textContent = booked;
   } catch(e) { /* ignore */ }
 
-  // Load all bookings into table
+  // Load bookings into table
   const tbody = document.getElementById('admin-tbody');
   tbody.innerHTML = '<tr><td colspan="12" class="admin-empty">Loading…</td></tr>';
   try {
@@ -2592,49 +2739,162 @@ async function loadAdminData() {
       const nights = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
       const payClass = { success:'success', advance:'advance', cash:'cash', failed:'failed' }[b.payment_status] || 'success';
       const payLabel = { success:'Paid', advance:'Advance', cash:'Cash', failed:'Failed' }[b.payment_status] || b.payment_status;
+      
+      const rid = b.room_id || 0; // fallback
+      const bid = b.booking_id || 0;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-weight:500;color:var(--light)">#${b.booking_id}</td>
+        <td style="font-weight:500;color:var(--light)">#${bid}</td>
         <td style="font-weight:500">${esc(b.customer_name)}</td>
         <td style="color:var(--mid);font-size:.72rem">${esc(b.customer_email)}</td>
         <td style="font-weight:600">${esc(b.room_number)}</td>
         <td style="text-transform:capitalize">${b.room_type}</td>
         <td style="text-transform:capitalize">${b.view_type}</td>
-        <td>${b.check_in}</td>
-        <td>${b.check_out}</td>
+        <td>${fmtDate(b.check_in)}</td>
+        <td>${fmtDate(b.check_out)}</td>
         <td style="text-align:center">${nights}</td>
         <td style="color:var(--gold);font-weight:600">₹${fmt(b.amount)}</td>
         <td><span class="pay-badge ${payClass}">${payLabel}</span></td>
-        <td><button class="btn-release" id="rel-btn-${b.booking_id}" onclick="releaseRoom(${b.room_id}, ${b.booking_id}, this)">Release</button></td>`;
+        <td><button class="btn-release" id="rel-btn-${bid}" onclick="releaseRoom(${rid}, ${bid}, this)">Release</button></td>`;
       tbody.appendChild(tr);
     });
+
+    // ── Populate Breakfast Orders section ─────────
+    const bfGrid  = document.getElementById('bf-grid');
+    const bfEmpty = document.getElementById('bf-empty');
+    const bfSum   = document.getElementById('bf-summary');
+    bfGrid.innerHTML = '';
+
+    const bfOrders = data.filter(b => b.breakfast_opt);
+    if (!bfOrders.length) {
+      bfEmpty.style.display = 'block';
+      bfGrid.style.display  = 'none';
+      bfSum.textContent = '';
+    } else {
+      bfEmpty.style.display = 'none';
+      bfGrid.style.display  = 'grid';
+      const totalPeople = bfOrders.reduce((s, b) => s + (b.adults||0) + (b.children||0), 0);
+      const totalDays   = bfOrders.reduce((s, b) => s + (b.breakfast_days||0), 0);
+      bfSum.textContent = `${bfOrders.length} booking${bfOrders.length>1?'s':''} · ${totalPeople} guests · ${totalDays} total breakfast-days`;
+
+      bfOrders.forEach(b => {
+        const guests  = (b.adults||0) + (b.children||0);
+        const days    = b.breakfast_days || 0;
+        const bfCost  = 500 * guests * days;
+        const nights  = Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000);
+        const card = document.createElement('div');
+        card.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)';
+        card.innerHTML = `
+          <div style="background:linear-gradient(90deg,#f59e0b,#d97706);padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#fff;font-family:'Playfair Display',serif;font-size:1rem">Room ${esc(b.room_number)}</span>
+            <span style="color:rgba(255,255,255,.85);font-size:.7rem;letter-spacing:1px;text-transform:uppercase">Breakfast</span>
+          </div>
+          <div style="padding:14px 16px;font-size:.8rem;display:flex;flex-direction:column;gap:7px">
+            <div style="font-weight:600;color:var(--text)">${esc(b.customer_name)}</div>
+            <div style="color:var(--mid);font-size:.72rem">${esc(b.customer_email)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+              <span style="background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:99px;font-size:.68rem;letter-spacing:.5px">
+                🧑 ${b.adults||0} Adult${(b.adults||0)!==1?'s':''} + 👶 ${b.children||0} Child${(b.children||0)!==1?'ren':''}
+              </span>
+              <span style="background:#ecfdf5;color:#065f46;padding:3px 9px;border-radius:99px;font-size:.68rem;letter-spacing:.5px">
+                📅 ${days} of ${nights} night${nights!==1?'s':''}
+              </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:10px;border-top:1px solid var(--border)">
+              <span style="color:var(--mid);font-size:.7rem">#${b.booking_id} · ${fmtDate(b.check_in)} → ${fmtDate(b.check_out)}</span>
+              <span style="color:#d97706;font-weight:600;font-size:.85rem">₹${fmt(bfCost)}</span>
+            </div>
+          </div>`;
+        bfGrid.appendChild(card);
+      });
+    }
+
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="12" class="admin-empty" style="color:var(--red)">Could not load bookings.</td></tr>`;
   }
 }
 
-async function releaseRoom(roomId, bookingId, btn) {
-  if (!confirm(`Release Room? This will cancel the booking #${bookingId} and mark the room as available.`)) return;
-  btn.disabled = true;
-  btn.textContent = '…';
+// ── Release Modal State ────────────────────────
+let _releaseContext = null;  // { mode: 'single'|'all', roomId, bookingId, btn }
+
+function openReleaseModal(mode, roomId, bookingId, btn) {
+  _releaseContext = { mode, roomId, bookingId, btn };
+  const overlay = document.getElementById('release-overlay');
+  const msgEl   = document.getElementById('release-modal-msg');
+  const titleEl = document.getElementById('release-modal-title');
+  const confirmBtn = document.getElementById('release-confirm-btn');
+
+  document.getElementById('release-pass-input').value = '';
+  document.getElementById('release-err').textContent  = '';
+
+  if (mode === 'all') {
+    titleEl.textContent   = 'Release All Rooms';
+    msgEl.textContent     = '⚠️ This will cancel ALL active bookings and mark every room as available. This cannot be undone.';
+    confirmBtn.textContent = 'Release All Rooms';
+  } else {
+    titleEl.textContent   = `Release Booking #${bookingId}`;
+    msgEl.textContent     = `This will cancel booking #${bookingId} and mark the room as available.`;
+    confirmBtn.textContent = 'Release Room';
+  }
+
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('release-pass-input').focus(), 50);
+}
+
+function closeReleaseModal() {
+  document.getElementById('release-overlay').style.display = 'none';
+  _releaseContext = null;
+}
+
+async function confirmRelease() {
+  const pass = document.getElementById('release-pass-input').value;
+  const errEl = document.getElementById('release-err');
+  
+  if (!pass) { errEl.textContent = 'Please enter the admin password.'; return; }
+  if (pass !== ADMIN_PASS) { errEl.textContent = 'Incorrect password. Try again.'; return; }
+
+  const ctx = _releaseContext;
+  if (!ctx) return;
+
+  const confirmBtn = document.getElementById('release-confirm-btn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = '…';
+
   try {
-    const res  = await fetch(`${API}/rooms/${roomId}/release`, { method: 'PATCH' });
-    const data = await res.json();
+    let res, data;
+    if (ctx.mode === 'all') {
+      res  = await fetch(`${API}/rooms/release-all`, { method: 'PATCH' });
+      data = await res.json();
+    } else {
+      res  = await fetch(`${API}/rooms/${ctx.roomId}/release`, { method: 'PATCH' });
+      data = await res.json();
+    }
+
     if (data.success) {
-      showToast('✅ Room released successfully!');
+      closeReleaseModal();
+      showToast(ctx.mode === 'all' ? '✅ All rooms released!' : '✅ Room released successfully!');
       loadAdminData();
-      loadRooms();         // refresh the 3D building too
+      loadRooms();
       loadMyBookings();
     } else {
-      showToast('❌ ' + (data.error || 'Could not release room.'));
-      btn.disabled = false;
-      btn.textContent = 'Release';
+      errEl.textContent = data.error || 'Server error. Please try again.';
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = ctx.mode === 'all' ? 'Release All Rooms' : 'Release Room';
     }
   } catch(e) {
-    showToast('❌ Network error.');
-    btn.disabled = false;
-    btn.textContent = 'Release';
+    errEl.textContent = 'Network error. Is the server running?';
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = ctx.mode === 'all' ? 'Release All Rooms' : 'Release Room';
   }
+}
+
+function releaseRoom(roomId, bookingId, btn) {
+  openReleaseModal('single', roomId, bookingId, btn);
+}
+
+function releaseAllRooms() {
+  openReleaseModal('all', null, null, null);
 }
 
 // ══════════════════════════════════════════════════════
