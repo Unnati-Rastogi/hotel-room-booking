@@ -192,14 +192,8 @@ def release_all_rooms():
     try:
         conn   = get_connection()
         cursor = conn.cursor()
-        conn.start_transaction()
-        # Must delete payments first (FK: payments.booking_id -> bookings.booking_id)
-        cursor.execute("""
-            DELETE p FROM payments p
-            JOIN bookings b ON b.booking_id = p.booking_id
-            WHERE b.check_out >= CURDATE()
-        """)
-        cursor.execute("DELETE FROM bookings WHERE check_out >= CURDATE()")
+        # We NO LONGER delete bookings or payments to preserve history.
+        # Just mark all rooms as available.
         cursor.execute("UPDATE rooms SET status = 'available'")
         conn.commit()
         return jsonify({"success": True, "message": "All rooms released successfully."}), 200
@@ -715,19 +709,8 @@ def release_room(room_id):
             conn.rollback()
             return jsonify({"error": "Room not found."}), 404
 
-        # Get booking IDs for this room first
-        cursor.execute("""
-            SELECT booking_id FROM bookings
-            WHERE room_id = %s AND check_out >= CURDATE()
-        """, (room_id,))
-        booking_ids = [r["booking_id"] for r in cursor.fetchall()]
-
-        if booking_ids:
-            # Delete payments first (FK constraint)
-            fmt_ids = ",".join(["%s"] * len(booking_ids))
-            cursor.execute(f"DELETE FROM payments WHERE booking_id IN ({fmt_ids})", booking_ids)
-            # Then delete bookings
-            cursor.execute(f"DELETE FROM bookings WHERE booking_id IN ({fmt_ids})", booking_ids)
+        # We NO LONGER delete bookings or payments to preserve history.
+        # Just mark this specific room as available.
 
         # Mark room as available
         cursor.execute(
@@ -750,7 +733,9 @@ def release_room(room_id):
 # ══════════════════════════════════════════════════════════
 @app.route("/bookings/user/<path:email>", methods=["GET"])
 def get_user_bookings(email):
-    query = """
+    show_all = request.args.get("all", "0") == "1"
+    where_date = "" if show_all else "AND b.check_out >= CURDATE()"
+    query = f"""
         SELECT b.booking_id, b.check_in, b.check_out, b.booking_date,
                c.name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
                r.room_id, r.room_number, r.floor_number, r.room_type, r.price, r.view_type,
@@ -759,7 +744,7 @@ def get_user_bookings(email):
         JOIN customers c ON c.customer_id = b.customer_id
         JOIN rooms     r ON r.room_id     = b.room_id
         LEFT JOIN payments p ON p.booking_id = b.booking_id
-        WHERE LOWER(c.email) = LOWER(%s)
+        WHERE LOWER(c.email) = LOWER(%s) {where_date}
         ORDER BY b.booking_date DESC
     """
     try:

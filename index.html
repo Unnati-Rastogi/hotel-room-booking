@@ -606,6 +606,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .bv.amt { color: var(--gold); font-weight: 600; }
 .bl-empty { color: var(--light); text-align: center; padding: 36px; grid-column: 1/-1; font-size: .85rem; }
 
+/* Past/Inactive bookings styling */
+.bcard.past { opacity: 0.6; filter: grayscale(0.4); background: #f1f5f9; }
+.admin-table tr.past td { opacity: 0.6; background: #f8fafc; color: var(--light); }
+.admin-table tr.past td .pay-badge { opacity: 0.7; filter: grayscale(1); }
+
 /* ══════════════════════════════════════════════
    REVIEWS SECTION
 ══════════════════════════════════════════════ */
@@ -1092,7 +1097,7 @@ footer {
     <h1 class="hero-title">Where Every Stay Becomes<br/><em>A Story Worth Telling</em></h1>
     <p class="hero-sub">Five floors of handcrafted luxury, overlooking sea, pool, garden, and city vistas.<br/>Select your room, book instantly, and arrive to perfection.</p>
     <div class="hero-btns">
-      <a href="#book-section" class="btn-hero-primary">Explore Rooms</a>
+      <a href="#book-section" class="btn-hero-primary" id="btn-hero-explore">Explore Rooms</a>
       <a href="#reviews-section" class="btn-hero-outline">Read Reviews</a>
     </div>
     <div class="hero-stats">
@@ -1295,7 +1300,10 @@ footer {
   <div id="my-bookings-section">
     <div class="res-head">
       <h2 id="my-bookings-title">My Bookings</h2>
-      <button class="btn-sm" onclick="loadMyBookings()">&#8635; Refresh</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn-sm" id="btn-user-history" onclick="toggleUserHistory()" style="border-color:var(--mid);color:var(--mid)">📋 Show History</button>
+        <button class="btn-sm" onclick="loadMyBookings()">&#8635; Refresh</button>
+      </div>
     </div>
     <!-- Populated when logged in -->
     <div id="my-bl-grid"></div>
@@ -1812,7 +1820,12 @@ function calcPrice() {
   const co = document.getElementById('co')?.value;
   if (!ci || !co) { pp.classList.remove('show'); return; }
   const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
-  if (nights <= 0) { pp.classList.remove('show'); return; }
+  if (nights <= 0) { 
+    setH('pp-desc', '<span style="color:var(--red)">Check-out must be after check-in.</span>');
+    setT('pp-total', '—');
+    pp.classList.add('show');
+    return; 
+  }
 
   const adults = parseInt(document.getElementById('g-adults')?.value) || 0;
   const children = parseInt(document.getElementById('g-children')?.value) || 0;
@@ -1853,7 +1866,16 @@ function openPayment() {
   const co    = document.getElementById('co')?.value;
 
   if (!name || !email) { showBpMsg('Please fill in required guest details.', 'err'); return; }
-  if (!ci || !co || new Date(co) <= new Date(ci)) { showBpMsg('Invalid stay dates.', 'err'); return; }
+  if (!ci || !co) { showBpMsg('Please select stay dates.', 'err'); return; }
+  
+  const dIn = new Date(ci);
+  const dOut = new Date(co);
+  const dToday = new Date();
+  dToday.setHours(0,0,0,0);
+  dIn.setHours(0,0,0,0);
+
+  if (dIn < dToday) { showBpMsg('Check-in cannot be in the past.', 'err'); return; }
+  if (dOut <= dIn) { showBpMsg('Check-out must be after check-in date.', 'err'); return; }
 
   const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
   const adults = parseInt(document.getElementById('g-adults')?.value) || 0;
@@ -1878,6 +1900,9 @@ function openPayment() {
   setD('pm-step-1', 'block');
   setD('pm-step-2', 'none');
   document.getElementById('pay-overlay')?.classList.add('open');
+  
+  // Update button text with correct amount
+  onPayMethodChange();
 }
 
 function closePaymentModal() {
@@ -1968,8 +1993,14 @@ async function processPayment() {
   if (!isCash) {
     const cardNum = document.getElementById('pm-card-num')?.value.replace(/\s/g,'');
     const cardName = document.getElementById('pm-card-name')?.value.trim();
+    const expiry = document.getElementById('pm-expiry')?.value.trim();
+    const cvv = document.getElementById('pm-cvv')?.value.trim();
+
     if (!cardNum || cardNum.length < 16) { alert('Please enter a valid 16-digit card number.'); return; }
     if (!cardName) { alert('Please enter the cardholder name.'); return; }
+    if (!expiry || expiry.length < 5) { alert('Please enter a valid expiry date (MM/YY).'); return; }
+    if (!cvv || cvv.length < 3) { alert('Please enter a valid 3-digit CVV.'); return; }
+
     card_last4 = cardNum.slice(-4);
   }
 
@@ -2410,6 +2441,10 @@ function applyAuthState(u) {
     loadMyBookings();
   }
 
+  // Hide "Explore Rooms" for admin
+  const exploreBtn = document.getElementById('btn-hero-explore');
+  if (exploreBtn) exploreBtn.style.display = isAdmin ? 'none' : '';
+
   // Admin-only: show All Reservations in main area
   const resSec = document.getElementById('reservations-section');
   if (isAdmin) {
@@ -2603,17 +2638,19 @@ async function loadMyBookings() {
 
   grid.innerHTML = '<div class="bl-empty">Loading…</div>';
   try {
-    let url = u.role === 'admin' ? `${API}/bookings` : `${API}/bookings/user/${encodeURIComponent(u.email)}`;
+    const showAll = _userShowHistory ? '1' : '0';
+    let url = u.role === 'admin' ? `${API}/bookings?all=${showAll}` : `${API}/bookings/user/${encodeURIComponent(u.email)}?all=${showAll}`;
     const res  = await fetch(url);
     const data = await res.json();
     grid.innerHTML = '';
     if (!data.length) {
-      grid.innerHTML = `<div class="bl-empty">No reservations found. Book your first room above!</div>`;
+      grid.innerHTML = `<div class="bl-empty">${_userShowHistory ? 'No booking history found.' : 'No active reservations found. Book your first room above!'}</div>`;
       return;
     }
     data.forEach(b => {
+      const isPast = new Date(b.check_out) < new Date();
       const card = document.createElement('div');
-      card.className = 'bcard';
+      card.className = `bcard ${isPast ? 'past' : ''}`;
       const payLabel = { success:'Paid', advance:'30% Advance', cash:'Cash @ Hotel', failed:'Failed' }[b.payment_status] || 'Paid';
       card.innerHTML = `
         <div class="bcard-head">
@@ -2648,6 +2685,22 @@ function closeAdminPanel() {
 }
 
 let _showHistory = false;
+let _userShowHistory = false;
+
+function toggleUserHistory() {
+  _userShowHistory = !_userShowHistory;
+  const btn = document.getElementById('btn-user-history');
+  if (_userShowHistory) {
+    btn.textContent = '📋 Active Only';
+    btn.style.color = 'var(--gold)';
+    btn.style.borderColor = 'var(--gold)';
+  } else {
+    btn.textContent = '📋 Show History';
+    btn.style.color = 'var(--mid)';
+    btn.style.borderColor = 'var(--mid)';
+  }
+  loadMyBookings();
+}
 
 function toggleBookingHistory() {
   _showHistory = !_showHistory;
@@ -2680,7 +2733,7 @@ async function loadAdminData() {
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="12" class="admin-empty">Loading…</td></tr>';
   try {
-    const res  = await fetch(`${API}/bookings`);
+    const res  = await fetch(`${API}/bookings?all=${_showHistory ? '1' : '0'}`);
     const data = await res.json();
     setT('astat-bookings', data.length);
     if (!data.length) {
@@ -2689,8 +2742,10 @@ async function loadAdminData() {
     }
     tbody.innerHTML = '';
     data.forEach(b => {
+      const isPast = new Date(b.check_out) < new Date();
       const payLabel = { success:'Paid', advance:'Advance', cash:'Cash', failed:'Failed' }[b.payment_status] || 'Paid';
       const tr = document.createElement('tr');
+      if (isPast) tr.classList.add('past');
       tr.innerHTML = `
         <td style="color:var(--light)">#${b.booking_id}</td>
         <td style="font-weight:500">${esc(b.customer_name)}</td>
