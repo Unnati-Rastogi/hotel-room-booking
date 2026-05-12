@@ -2,7 +2,7 @@
 
 A premium, full-stack hotel reservation platform featuring an interactive 3D building visualizer, real-time availability tracking, and a secure administration panel.
 
-## 🌟 Key Features
+## Key Features
 - **3D Interactive Building**: Browse rooms by rotating a 3D model of the hotel.
 - **Smart Filtering**: Filter rooms by Floor, View (Sea, Pool, Garden, City), Type (Suite, Double, Single), and Price.
 - **Secure Booking**: Automated guest record management and payment simulation (Full, Advance, or Cash).
@@ -13,14 +13,14 @@ A premium, full-stack hotel reservation platform featuring an interactive 3D bui
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 - **Frontend**: Vanilla HTML5, CSS3, JavaScript (No frameworks).
 - **Backend**: Python 3.13+ with Flask.
 - **Database**: MySQL with triggers for status management.
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Prerequisites
 - **Python 3.8+**
@@ -56,7 +56,7 @@ Visit [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
 ---
 
-## 🔐 Admin Credentials
+## Admin Credentials
 - **Email**: `admin@tvuc.com`
 - **Password**: `admin123`
 
