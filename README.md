@@ -62,7 +62,7 @@ Visit [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
 ---
 
-## 🎓 Academic Summary (For Evaluators)
+## Academic Summary (For Evaluators)
 The system demonstrates advanced concepts including:
 1. **Relational Data Integrity**: Foreign keys between `bookings`, `payments`, and `rooms`.
 2. **Database Triggers**: `trg_after_booking_insert` handles automatic state transitions.
