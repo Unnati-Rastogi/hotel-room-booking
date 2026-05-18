@@ -14,7 +14,7 @@ from flask_cors import CORS
 from datetime import datetime, date
 
 # Serve index.html from the same directory as this script
-app = Flask(__name__, static_folder=os.path.dirname(os.path.abspath(__file__)))
+app = Flask(__name__, static_folder=os.path.dirname(os.path.abspath(__file__)), static_url_path='')
 CORS(app)
 
 # ──────────────────────────────────────────────────────────
@@ -338,13 +338,34 @@ def get_rooms():
     floor     = request.args.get("floor")
     view_type = request.args.get("view_type")
     max_price = request.args.get("max_price")
+    check_in  = request.args.get("check_in")
+    check_out = request.args.get("check_out")
 
-    query  = "SELECT * FROM rooms WHERE 1=1"
     params = []
-    if floor:     query += " AND floor_number = %s"; params.append(int(floor))
-    if view_type: query += " AND view_type = %s";    params.append(view_type)
-    if max_price: query += " AND price <= %s";       params.append(float(max_price))
-    query += " ORDER BY floor_number ASC, room_number ASC"
+    if check_in and check_out:
+        query = """
+            SELECT r.room_id, r.floor_number, r.room_number, r.room_type, r.price, 
+                   CASE 
+                     WHEN EXISTS (
+                       SELECT 1 FROM bookings b
+                       WHERE b.room_id = r.room_id
+                         AND b.check_in < %s
+                         AND b.check_out > %s
+                     ) THEN 'booked'
+                     ELSE 'available'
+                   END AS status,
+                   r.view_type, r.smoking, r.balcony
+            FROM rooms r
+            WHERE 1=1
+        """
+        params.extend([check_out, check_in])
+    else:
+        query = "SELECT * FROM rooms r WHERE 1=1"
+
+    if floor:     query += " AND r.floor_number = %s"; params.append(int(floor))
+    if view_type: query += " AND r.view_type = %s";    params.append(view_type)
+    if max_price: query += " AND r.price <= %s";       params.append(float(max_price))
+    query += " ORDER BY r.floor_number ASC, r.room_number ASC"
 
     try:
         conn   = get_connection()
@@ -424,8 +445,8 @@ def book_room():
             conn.rollback(); return jsonify({"error": "Room not found."}), 404
 
         # 3. Status check
-        if room["status"] == "booked":
-            conn.rollback(); return jsonify({"error": "Room is already booked."}), 409
+        # We bypass checking the global room["status"] == "booked" column here because 
+        # availability is checked dynamically for specific stay dates in the overlap check below.
 
         # 4. Date overlap check
         cursor.execute("""
@@ -835,6 +856,93 @@ def sync_reviews_with_rooms():
     finally:
         try: cursor.close(); conn.close()
         except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  PATCH /rooms/<int:room_id>/price
+# ══════════════════════════════════════════════════════════
+@app.route("/rooms/<int:room_id>/price", methods=["PATCH"])
+def update_room_price(room_id):
+    data  = request.get_json() or {}
+    price = data.get("price")
+    if price is None:
+        return jsonify({"error": "Price is required."}), 400
+    try:
+        price = float(price)
+        if price <= 0:
+            return jsonify({"error": "Price must be greater than 0."}), 400
+    except ValueError:
+        return jsonify({"error": "Invalid price format."}), 400
+
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE rooms SET price = %s WHERE room_id = %s", (price, room_id))
+        conn.commit()
+        return jsonify({"success": True, "message": "Room price updated successfully."}), 200
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
+
+# ══════════════════════════════════════════════════════════
+#  PATCH /bookings/<int:booking_id>/pay
+# ══════════════════════════════════════════════════════════
+@app.route("/bookings/<int:booking_id>/pay", methods=["PATCH"])
+def pay_booking(booking_id):
+    conn = cursor = None
+    try:
+        conn   = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        conn.start_transaction()
+
+        # Fetch booking details to calculate the full correct payment amount
+        cursor.execute("""
+            SELECT b.booking_id, b.check_in, b.check_out, b.adults, b.children, b.breakfast_opt, b.breakfast_days,
+                   r.price
+            FROM bookings b
+            JOIN rooms r ON r.room_id = b.room_id
+            WHERE b.booking_id = %s FOR UPDATE
+        """, (booking_id,))
+        b = cursor.fetchone()
+        if not b:
+            conn.rollback()
+            return jsonify({"error": "Booking not found."}), 404
+
+        # Calculate exact total cost (nights * room rate + breakfast option total)
+        nights     = (b["check_out"] - b["check_in"]).days
+        room_total = float(b["price"]) * nights
+        breakfast_total = 0
+        if b["breakfast_opt"]:
+            breakfast_total = 500 * (b["adults"] + b["children"]) * b["breakfast_days"]
+        full_amount = room_total + breakfast_total
+
+        # Update the payment amount and status
+        cursor.execute("""
+            UPDATE payments
+            SET amount = %s, payment_status = 'success'
+            WHERE booking_id = %s
+        """, (full_amount, booking_id))
+        
+        # In case booking had no payment row, insert it
+        if cursor.rowcount == 0:
+            cursor.execute("""
+                INSERT INTO payments (booking_id, amount, payment_status)
+                VALUES (%s, %s, 'success')
+            """, (booking_id, full_amount))
+
+        conn.commit()
+        return jsonify({"success": True, "message": "Booking marked as fully paid successfully.", "amount": full_amount}), 200
+
+    except Error as e:
+        if conn: conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        try: cursor.close(); conn.close()
+        except Exception: pass
+
 
 
 # ══════════════════════════════════════════════════════════

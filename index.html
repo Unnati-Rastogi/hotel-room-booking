@@ -13,39 +13,60 @@
    DESIGN TOKENS
 ══════════════════════════════════════════════ */
 :root {
-  --cream:      #ffffff;
-  --cream2:     #f1f5f9;
-  --cream3:     #e2e8f0;
-  --dark:       #1e293b;
-  --dark2:      #334155;
-  --dark3:      #475569;
-  --gold:       #2563eb;
-  --gold2:      #3b82f6;
-  --gold-dim:   rgba(37,99,235,.10);
-  --text:       #1e293b;
-  --mid:        #64748b;
-  --light:      #94a3b8;
-  --border:     #e2e8f0;
+  --ivory:      #fdfbf7;
+  --ivory2:     #f7f3e9;
+  --obsidian:   #080c13;
+  --obsidian2:  #0f172a;
+  --gold:       #d4af37;
+  --gold2:      #b5952f;
+  --bronze:     #8d7249;
+  --gold-dim:   rgba(212,175,55,.10);
+  --text:       #111827;
+  --text-dim:   #4b5563;
+  --light:      #9ca3af;
+  --border:     rgba(15, 23, 42, 0.08);
+  --border-inv: rgba(255, 255, 255, 0.1);
 
-  --green:      #16a34a;
-  --green-bg:   rgba(22,163,74,.12);
-  --red:        #dc2626;
-  --red-bg:     rgba(220,38,38,.12);
-  --yellow-bg:  rgba(37,99,235,.12);
-
-  --wall-front: #f8fafc;
-  --wall-side:  #e2e8f0;
-  --wall-back:  #f1f5f9;
-  --wall-line:  rgba(100,116,139,.18);
+  --sage:       #4a6741;
+  --sage-bg:    rgba(74, 103, 65, 0.12);
+  --sienna:     #a64d4d;
+  --sienna-bg:  rgba(166, 77, 77, 0.12);
+  
+  --wall-front: #ffffff;
+  --wall-side:  #f3f4f6;
+  --wall-back:  #f9fafb;
+  --wall-line:  rgba(15, 23, 42, 0.05);
 }
+
+/* Base Styles Update */
+body { font-family: 'Inter', sans-serif; background: var(--ivory); color: var(--text); line-height: 1.6; }
+h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 500; }
+
+/* ── UTILITIES ── */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+.glass-dark {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.section-pad { padding: 80px 48px; }
+@media (max-width: 768px) { .section-pad { padding: 60px 24px; } }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text); }
+body { font-family: 'Inter', sans-serif; background: var(--ivory); color: var(--text); }
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-track { background: var(--ivory); }
 ::-webkit-scrollbar-thumb { background: var(--cream3); border-radius: 3px; }
 
 /* ══════════════════════════════════════════════
@@ -64,7 +85,7 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 .nav-brand { display: flex; align-items: center; gap: 12px; }
 .nav-logo {
   width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--dark2), var(--dark3));
+  background: linear-gradient(135deg, var(--obsidian2), var(--dark3));
   border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
   color: var(--gold); font-size: 1.1rem; font-weight: 700;
@@ -80,7 +101,7 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
 .nav-links { display: flex; align-items: center; gap: 6px; }
 .nav-links a {
   font-size: .75rem; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--mid); text-decoration: none; padding: 6px 12px;
+  color: var(--text-dim); text-decoration: none; padding: 6px 12px;
   border-radius: 4px; transition: all .2s;
 }
 .nav-links a:hover { color: var(--gold); background: var(--gold-dim); }
@@ -97,94 +118,120 @@ body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--
    HERO SECTION
 ══════════════════════════════════════════════ */
 #hero {
-  background: linear-gradient(135deg, var(--dark) 0%, #2e1e0e 45%, #4a3018 100%);
-  padding: 88px 48px 72px;
-  text-align: center;
   position: relative;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   overflow: hidden;
+  padding: 0 48px;
+  background: url('/images/hero_bg_1778935639607.png') no-repeat center center/cover;
 }
 #hero::before {
   content: '';
   position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(201,168,76,.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 30%, rgba(201,168,76,.06) 0%, transparent 50%);
+  background: linear-gradient(to bottom, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.7) 100%);
 }
-.hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  animation: fadeIn 1.5s ease;
+}
 .hero-eyebrow {
-  font-size: .68rem; letter-spacing: 4px; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 16px; font-weight: 500;
+  font-size: .8rem; letter-spacing: 6px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px; font-weight: 500;
 }
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
-  color: #f5f0e8; font-weight: 400; line-height: 1.2;
-  margin-bottom: 16px;
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  color: #fff; font-weight: 400; line-height: 1.1;
+  margin-bottom: 24px;
 }
-.hero-title em { font-style: italic; color: var(--gold2); }
+.hero-title em { font-style: italic; color: var(--gold); }
 .hero-sub {
-  font-size: .92rem; color: rgba(245,240,232,.6);
-  line-height: 1.7; margin-bottom: 36px; font-weight: 300;
+  font-size: 1.1rem; color: rgba(255,255,255,.8);
+  line-height: 1.6; margin-bottom: 40px; font-weight: 300;
+  max-width: 600px; margin-inline: auto;
 }
-.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero-btns { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
 .btn-hero-primary {
-  padding: 13px 32px;
+  padding: 18px 48px;
   background: var(--gold);
-  border: none; border-radius: 4px;
+  border: none; border-radius: 0;
   color: #fff; font-family: 'Inter', sans-serif;
-  font-size: .85rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+  font-size: .85rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
   cursor: pointer; text-decoration: none;
-  transition: background .2s, transform .15s;
+  transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-hero-primary:hover { background: var(--gold2); transform: translateY(-2px); }
+.btn-hero-primary:hover { background: #fff; color: var(--obsidian); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
 .btn-hero-outline {
-  padding: 13px 28px;
+  padding: 18px 48px;
   background: transparent;
-  border: 1px solid rgba(245,240,232,.3);
-  border-radius: 4px; color: rgba(245,240,232,.8);
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 0; color: #fff;
   font-family: 'Inter', sans-serif;
-  font-size: .85rem; letter-spacing: 1px; text-transform: uppercase;
-  cursor: pointer; text-decoration: none; transition: all .2s;
+  font-size: .85rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; text-decoration: none; transition: all .4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-hero-outline:hover { border-color: var(--gold); color: var(--gold); }
-
-.hero-stats {
-  display: flex; justify-content: center; gap: 48px;
-  margin-top: 48px; padding-top: 36px;
-  border-top: 1px solid rgba(255,255,255,.08);
-}
-.hs { text-align: center; }
-.hs-num {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.9rem; color: var(--gold2); line-height: 1;
-}
-.hs-lbl { font-size: .65rem; color: rgba(245,240,232,.45); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.btn-hero-outline:hover { background: #fff; color: var(--obsidian); border-color: #fff; transform: translateY(-5px); }
 
 /* ══════════════════════════════════════════════
-   AMENITIES STRIP
+   NEW SECTIONS (OVERVIEW, AMENITIES, DINING, GALLERY)
 ══════════════════════════════════════════════ */
-#amenities {
-  background: var(--cream2);
-  border-bottom: 1px solid var(--border);
-  padding: 28px 48px;
-}
-.amenities-grid {
-  max-width: 1100px; margin: 0 auto;
-  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-}
-.amenity {
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 16px;
-  background: var(--cream);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  font-size: .75rem; color: var(--mid);
-  white-space: nowrap;
-  transition: all .2s;
-}
-.amenity:hover { border-color: var(--gold); color: var(--text); }
-.amenity span { font-size: 1rem; }
+.lux-heading { text-align: center; margin-bottom: 56px; }
+.lux-heading h2 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--obsidian); margin-bottom: 16px; }
+.lux-heading.light h2 { color: #fff; }
+.lux-heading p { font-size: 1rem; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; font-weight: 500; }
+.lux-heading.light p { color: rgba(255,255,255,0.7); }
+.lux-heading .divider { width: 80px; height: 2px; background: var(--gold); margin: 24px auto 0; }
 
+/* Overview */
+#overview { background: var(--ivory); }
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; max-width: 1200px; margin: 0 auto; }
+.ov-text h3 { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 24px; color: var(--obsidian); line-height: 1.3; }
+.ov-text p { font-size: 1.05rem; color: var(--text-dim); line-height: 1.8; margin-bottom: 24px; }
+.ov-img { border-radius: 16px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.12); position: relative; }
+.ov-img img { width: 100%; height: auto; display: block; transition: transform 0.7s ease; }
+.ov-img:hover img { transform: scale(1.05); }
+.ov-img::after { content: ''; position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; pointer-events: none; }
+@media (max-width: 900px) { .overview-grid { grid-template-columns: 1fr; } }
+
+/* Amenities Cards */
+#lux-amenities { background: var(--ivory2); }
+.am-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; max-width: 1200px; margin: 0 auto; }
+.am-card { background: var(--ivory); padding: 48px 32px; border-radius: 16px; text-align: center; border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+.am-card:hover { transform: translateY(-12px); border-color: var(--gold); box-shadow: 0 20px 40px rgba(212,175,55,0.15); }
+.am-icon { font-size: 3rem; margin-bottom: 24px; color: var(--gold); }
+.am-card h4 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--obsidian); margin-bottom: 16px; }
+.am-card p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; }
+
+/* Dining */
+#dining { background: var(--ivory); }
+.dining-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
+.dining-card { background: var(--ivory); border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.08); transition: transform 0.4s ease; border: 1px solid var(--border); }
+.dining-card:hover { transform: translateY(-10px); box-shadow: 0 24px 48px rgba(0,0,0,0.15); }
+.dc-img { height: 260px; overflow: hidden; position: relative; }
+.dc-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+.dining-card:hover .dc-img img { transform: scale(1.08); }
+.dc-tag { position: absolute; top: 20px; left: 20px; background: rgba(15,23,42,0.85); color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; backdrop-filter: blur(4px); font-weight: 500; }
+.dc-content { padding: 32px; }
+.dc-content h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--obsidian); margin-bottom: 12px; }
+.dc-content p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; }
+
+/* Gallery */
+#gallery { background: var(--obsidian); color: #fff; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px; max-width: 100%; margin: 0 auto; background: var(--obsidian); }
+.gal-item { height: 320px; overflow: hidden; position: relative; cursor: pointer; }
+.gal-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+.gal-item::after { content: ''; position: absolute; inset: 0; background: rgba(15,23,42,0.4); transition: background 0.4s ease; }
+.gal-item:hover img { transform: scale(1.1); }
+.gal-item:hover::after { background: transparent; }
+
+/* Polish the book section background */
+#book-section { padding-top: 40px; }
 /* ══════════════════════════════════════════════
    MAIN CONTENT AREA
 ══════════════════════════════════════════════ */
@@ -198,26 +245,36 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .section-head p { font-size: .83rem; color: var(--light); letter-spacing: .5px; }
 
 /* ══════════════════════════════════════════════
-   FILTER BAR
+   FILTER BAR (Minimalist Ribbon)
 ══════════════════════════════════════════════ */
 #filter-bar {
-  display: flex; flex-wrap: wrap; gap: 14px;
+  display: flex; flex-wrap: wrap; gap: 32px;
   align-items: flex-end; justify-content: center;
-  background: var(--cream2); border: 1px solid var(--border);
-  border-radius: 8px; padding: 16px 22px; margin-bottom: 24px;
+  background: transparent; border: none;
+  padding: 32px 0; margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-inv);
 }
-.fg { display: flex; flex-direction: column; gap: 4px; }
-.fg label { font-size: .6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--light); }
+.fg { display: flex; flex-direction: column; gap: 8px; }
+.fg label { font-size: .65rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
 .fg select {
-  background: var(--cream); border: 1px solid var(--border);
-  border-radius: 4px; padding: 7px 28px 7px 10px;
-  font-family: 'Inter', sans-serif; font-size: .8rem; color: var(--text);
+  background: transparent; border: none; border-bottom: 1.5px solid var(--gold);
+  border-radius: 0; padding: 10px 32px 8px 0;
+  font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff;
   cursor: pointer; appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23b0a090'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 8px center;
-  min-width: 110px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23d4af37'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 4px center;
+  min-width: 140px; transition: border-color .3s;
 }
-.fg select:focus { outline: none; border-color: var(--gold); }
+.fg select:focus { outline: none; border-color: #fff; }
+.fg select option { background: var(--obsidian); color: #fff; }
+.fg input[type="date"] {
+  background: transparent; border: none; border-bottom: 1.5px solid var(--gold);
+  border-radius: 0; padding: 10px 10px 8px 0;
+  font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff;
+  cursor: pointer; min-width: 140px; transition: border-color .3s;
+  color-scheme: dark;
+}
+.fg input[type="date"]:focus { outline: none; border-color: #fff; }
 
 /* Price slider */
 .price-wrap { display: flex; flex-direction: column; gap: 4px; }
@@ -245,32 +302,47 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
   padding: 7px 14px; background: none; border: 1px solid var(--border);
   border-radius: 4px; font-family: 'Inter', sans-serif;
   font-size: .72rem; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--mid); cursor: pointer; transition: all .2s;
+  color: var(--text-dim); cursor: pointer; transition: all .2s;
 }
 .btn-reset:hover { border-color: var(--gold); color: var(--gold); }
 
 /* ══════════════════════════════════════════════
-   LEGEND + DRAG HINT
+   CINEMATIC BOOKING SECTION
 ══════════════════════════════════════════════ */
+#book-section { 
+  background: var(--obsidian); 
+  padding: 80px 48px; 
+  margin: 0 -48px; 
+  position: relative;
+  overflow: hidden;
+}
+#book-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at center, rgba(212,175,55,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+#book-section .lux-heading h2 { color: #fff; }
+#book-section .lux-heading p { color: var(--gold); }
+
 #legend {
   display: flex; align-items: center; justify-content: center;
-  gap: 24px; margin-bottom: 8px;
+  gap: 32px; margin-bottom: 24px;
 }
-.leg { display: flex; align-items: center; gap: 7px; font-size: .73rem; color: var(--mid); }
-.leg-dot { width: 12px; height: 12px; border-radius: 3px; }
-.leg-dot.av { background: var(--green); }
-.leg-dot.sl { background: var(--gold); }
-.leg-dot.bk { background: var(--red); opacity: .7; }
-#drag-hint { text-align: center; font-size: .7rem; color: var(--light); letter-spacing: .8px; margin-bottom: 12px; }
+.leg { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: rgba(255,255,255,0.6); letter-spacing: 1px; text-transform: uppercase; }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+.leg-dot.av { background: var(--sage); color: var(--sage); }
+.leg-dot.sl { background: var(--gold); color: var(--gold); }
+.leg-dot.bk { background: var(--sienna); color: var(--sienna); opacity: .7; }
+#drag-hint { text-align: center; font-size: .75rem; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 24px; }
 
 /* ══════════════════════════════════════════════
    3D SCENE
 ══════════════════════════════════════════════ */
 #scene {
-  perspective: 1100px; perspective-origin: 50% 44%;
-  height: 460px;
+  perspective: 1200px; perspective-origin: 50% 40%;
+  height: 520px;
   display: flex; align-items: center; justify-content: center;
-  cursor: grab; user-select: none; margin-bottom: 52px;
+  cursor: grab; user-select: none; margin-bottom: 0;
 }
 #scene:active { cursor: grabbing; }
 
@@ -302,7 +374,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .face-top {
   width: 420px; height: 160px;
   left: -210px; top: -80px;
-  background: linear-gradient(135deg, var(--dark2), var(--dark3));
+  background: linear-gradient(135deg, var(--obsidian2), var(--dark3));
   border: 2px solid rgba(140,120,90,.28);
   transform: translateY(-140px) rotateX(90deg);
   display: flex; align-items: center; justify-content: center;
@@ -337,16 +409,37 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 
 /* room window */
 .room-w {
-  flex: 1; max-width: 68px; border-radius: 3px;
-  border: 1.5px solid rgba(120,100,70,.28);
+  flex: 1; max-width: 68px; border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.05);
   cursor: pointer; display: flex; flex-direction: column;
   align-items: center; justify-content: center; font-size: .6rem; font-weight: 500;
-  position: relative; transition: transform .12s, box-shadow .12s; padding: 3px 0;
+  position: relative; transition: all .2s cubic-bezier(0.4, 0, 0.2, 1); padding: 4px 0;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
-.room-w.available { background: var(--green-bg); border-color: rgba(74,138,90,.38); color: var(--green); }
-.room-w.available:hover  { transform: translateY(-3px) scale(1.1); box-shadow: 0 5px 14px rgba(74,138,90,.28); }
-.room-w.booked   { background: var(--red-bg);   border-color: rgba(160,64,64,.28); color: var(--red); cursor: not-allowed; opacity: .65; }
-.room-w.selected { background: var(--yellow-bg); border-color: var(--gold); color: #7a5a10; box-shadow: 0 0 0 2px rgba(201,168,76,.3), 0 5px 14px rgba(201,168,76,.22); transform: translateY(-3px) scale(1.1); }
+.room-w.available { 
+  background: rgba(74, 103, 65, 0.1); 
+  border-color: rgba(74, 103, 65, 0.4); 
+  color: var(--sage); 
+}
+.room-w.available:hover { 
+  background: var(--sage); color: #fff; 
+  transform: translateZ(10px) scale(1.1); 
+  box-shadow: 0 0 20px rgba(74, 103, 65, 0.6); 
+}
+.room-w.booked { 
+  background: rgba(166, 77, 77, 0.05); 
+  border-color: rgba(166, 77, 77, 0.2); 
+  color: var(--sienna); 
+  cursor: not-allowed; opacity: 0.3; 
+}
+.room-w.selected { 
+  background: var(--gold); 
+  border-color: #fff; 
+  color: var(--obsidian); 
+  transform: translateZ(15px) scale(1.15); 
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.8); 
+  z-index: 10;
+}
 .room-w.dim      { opacity: .14; pointer-events: none; }
 .rn { font-size: .68rem; line-height: 1.1; }
 .ri { font-size: .62rem; opacity: .72; }
@@ -376,35 +469,49 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .side-win   { flex: 1; background: rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.09); border-radius: 2px; height: 58%; }
 
 /* ══════════════════════════════════════════════
-   BOOKING PANEL
+   BOOKING PANEL (Side Drawer)
 ══════════════════════════════════════════════ */
 #booking-panel {
-  max-width: 580px; margin: 0 auto 56px;
-  background: var(--cream2); border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden; display: none;
+  position: fixed; top: 0; right: 0; width: 100%; max-width: 480px; height: 100vh;
+  background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
+  z-index: 1000; box-shadow: -20px 0 60px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-#booking-panel.open { display: block; }
+#booking-panel.open { display: flex; transform: translateX(0); }
+
+#drawer-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(8, 12, 19, 0.4);
+  backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none; transition: opacity .5s;
+}
+#drawer-overlay.open { opacity: 1; pointer-events: all; }
 
 .bp-head {
-  background: linear-gradient(90deg, var(--dark2), var(--dark3));
-  padding: 16px 22px; display: flex; justify-content: space-between; align-items: center;
+  padding: 32px; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
 }
-.bp-head h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #f0e8d8; font-weight: 400; }
-.bp-head .close-btn { background: none; border: none; color: rgba(240,232,216,.5); font-size: 1.1rem; cursor: pointer; }
-.bp-head .close-btn:hover { color: #f0e8d8; }
-.bp-body { padding: 22px; }
+.bp-head h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--obsidian); font-weight: 500; }
+.bp-head .close-btn { 
+  background: var(--ivory2); width: 40px; height: 40px; border-radius: 50%;
+  border: none; color: var(--obsidian); font-size: 1.2rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .3s;
+}
+.bp-head .close-btn:hover { background: var(--obsidian); color: #fff; transform: rotate(90deg); }
+.bp-body { padding: 32px; overflow-y: auto; flex: 1; }
 
 .room-card {
   display: flex; justify-content: space-between; align-items: flex-start;
-  background: var(--cream); border: 1px solid var(--border);
-  border-radius: 6px; padding: 14px 16px; margin-bottom: 20px;
+  background: transparent; border: none; border-bottom: 1px solid var(--border);
+  border-radius: 0; padding: 0 0 24px 0; margin-bottom: 32px;
 }
-.rc-left h4 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 3px; }
+.rc-left h4 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 8px; color: var(--obsidian); }
 .rc-badges { display: flex; flex-wrap: wrap; gap: 5px; }
 .badge-chip {
   font-size: .62rem; padding: 2px 8px; border-radius: 99px;
-  background: var(--cream2); border: 1px solid var(--border);
-  color: var(--mid); text-transform: capitalize;
+  background: var(--ivory2); border: 1px solid var(--border);
+  color: var(--text-dim); text-transform: capitalize;
 }
 .rc-right { text-align: right; }
 .rc-price { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: var(--gold); }
@@ -415,9 +522,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .form-grid { display: grid; gap: 10px; }
 .form-grid.two { grid-template-columns: 1fr 1fr; }
 .fld { display: flex; flex-direction: column; gap: 4px; }
-.fld label { font-size: .72rem; color: var(--mid); }
+.fld label { font-size: .72rem; color: var(--text-dim); }
 .fld input {
-  background: var(--cream); border: 1px solid var(--border);
+  background: var(--ivory); border: 1px solid var(--border);
   border-radius: 4px; padding: 9px 11px;
   font-family: 'Inter', sans-serif; font-size: .82rem; color: var(--text);
   transition: border-color .2s;
@@ -427,16 +534,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .fld input[type=date]::-webkit-calendar-picker-indicator { opacity: .4; cursor: pointer; }
 
 #price-preview {
-  background: var(--cream); border: 1px solid var(--border);
+  background: var(--ivory); border: 1px solid var(--border);
   border-radius: 6px; padding: 12px 14px; margin-bottom: 14px; display: none;
 }
 #price-preview.show { display: block; }
-.pp-row { display: flex; justify-content: space-between; font-size: .78rem; color: var(--mid); padding: 2px 0; }
+.pp-row { display: flex; justify-content: space-between; font-size: .78rem; color: var(--text-dim); padding: 2px 0; }
 .pp-total { display: flex; justify-content: space-between; font-size: .94rem; font-weight: 600; color: var(--gold); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 
 #btn-proceed {
   width: 100%; padding: 13px;
-  background: linear-gradient(135deg, var(--dark2), var(--dark3));
+  background: linear-gradient(135deg, var(--obsidian2), var(--dark3));
   border: none; border-radius: 5px; color: #f0e8d8;
   font-family: 'Inter', sans-serif; font-size: .83rem; font-weight: 500;
   letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
@@ -447,29 +554,29 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 #btn-proceed::after { content: '→'; font-size: 1rem; }
 
 #bp-msg { margin-top: 10px; padding: 9px 12px; border-radius: 4px; font-size: .78rem; line-height: 1.6; white-space: pre-line; display: none; }
-#bp-msg.err { display: block; background: var(--red-bg); color: var(--red); border: 1px solid rgba(160,64,64,.25); }
+#bp-msg.err { display: block; background: var(--sienna-bg); color: var(--sienna); border: 1px solid rgba(160,64,64,.25); }
 
 /* ══════════════════════════════════════════════
    PAYMENT MODAL
 ══════════════════════════════════════════════ */
 #pay-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(28,20,8,.65);
-  backdrop-filter: blur(6px);
+  position: fixed; inset: 0; z-index: 1500;
+  background: rgba(8, 12, 19, 0.85);
+  backdrop-filter: blur(20px);
   display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .3s;
+  opacity: 0; pointer-events: none; transition: opacity .5s;
 }
 #pay-overlay.open { opacity: 1; pointer-events: all; }
 
 #pay-modal {
-  background: var(--cream); border-radius: 12px;
-  width: 100%; max-width: 440px; margin: 16px;
-  max-height: 90vh; display: flex; flex-direction: column;
+  background: var(--ivory); border-radius: 0;
+  width: 100%; max-width: 520px; height: 100%; max-height: 100vh;
+  display: flex; flex-direction: column;
   overflow: hidden;
-  transform: translateY(24px); transition: transform .3s;
-  box-shadow: 0 32px 80px rgba(0,0,0,.35);
+  transform: scale(1.05); opacity: 0; transition: all .5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
 }
-#pay-overlay.open #pay-modal { transform: translateY(0); }
+#pay-overlay.open #pay-modal { transform: scale(1); opacity: 1; }
 
 #pay-form-view, #pay-result {
   display: flex; flex-direction: column; 
@@ -477,7 +584,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 }
 
 .pm-header {
-  background: linear-gradient(135deg, var(--dark), var(--dark3));
+  background: linear-gradient(135deg, var(--obsidian), var(--dark3));
   padding: 20px 24px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: space-between;
 }
@@ -517,16 +624,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
   border-radius: 6px; padding: 10px 14px; margin-bottom: 18px;
   display: flex; justify-content: space-between; align-items: center;
 }
-.pm-room-info { font-size: .78rem; color: var(--mid); }
+.pm-room-info { font-size: .78rem; color: var(--text-dim); }
 .pm-total { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); }
 
 /* payment form fields */
 .pm-form { display: grid; gap: 11px; }
 .pm-form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 .pm-fld { display: flex; flex-direction: column; gap: 4px; }
-.pm-fld label { font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--mid); }
+.pm-fld label { font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
 .pm-fld input {
-  background: var(--cream2); border: 1px solid var(--border);
+  background: var(--ivory2); border: 1px solid var(--border);
   border-radius: 5px; padding: 10px 13px;
   font-family: 'Inter', sans-serif; font-size: .85rem; color: var(--text);
   transition: border-color .2s, box-shadow .2s;
@@ -556,9 +663,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 #pay-result.show { display: block; }
 .pr-icon { font-size: 3rem; margin-bottom: 12px; }
 .pr-title { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin-bottom: 8px; }
-.pr-sub { font-size: .82rem; color: var(--mid); line-height: 1.6; margin-bottom: 18px; }
+.pr-sub { font-size: .82rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 18px; }
 .pr-details {
-  background: var(--cream2); border: 1px solid var(--border);
+  background: var(--ivory2); border: 1px solid var(--border);
   border-radius: 6px; padding: 12px 16px; text-align: left; margin-bottom: 18px;
 }
 .pr-row { display: flex; justify-content: space-between; font-size: .78rem; padding: 3px 0; border-bottom: 1px solid var(--border); }
@@ -569,7 +676,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 
 #btn-pm-close {
   padding: 11px 28px;
-  background: var(--dark2); border: none; border-radius: 4px;
+  background: var(--obsidian2); border: none; border-radius: 4px;
   color: #f0e8d8; font-family: 'Inter', sans-serif;
   font-size: .8rem; letter-spacing: 1.5px; text-transform: uppercase;
   cursor: pointer; transition: background .2s;
@@ -586,20 +693,20 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
   background: none; border: 1px solid var(--border); border-radius: 4px;
   padding: 7px 16px; font-family: 'Inter', sans-serif;
   font-size: .72rem; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--mid); cursor: pointer; transition: all .2s;
+  color: var(--text-dim); cursor: pointer; transition: all .2s;
 }
 .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
 #bl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 13px; }
 .bcard {
-  background: var(--cream2); border: 1px solid var(--border);
+  background: var(--ivory2); border: 1px solid var(--border);
   border-radius: 8px; padding: 16px; transition: transform .15s;
 }
 .bcard:hover { transform: translateY(-2px); }
 .bcard-head { display: flex; justify-content: space-between; margin-bottom: 10px; }
 .bcard-room { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
 .status-badge { padding: 2px 9px; border-radius: 99px; font-size: .6rem; letter-spacing: .5px; text-transform: uppercase; }
-.status-badge.success { background: var(--green-bg); color: var(--green); }
-.status-badge.failed  { background: var(--red-bg);   color: var(--red); }
+.status-badge.success { background: var(--sage-bg); color: var(--sage); }
+.status-badge.failed  { background: var(--sienna-bg);   color: var(--sienna); }
 .brow { display: flex; justify-content: space-between; font-size: .76rem; padding: 3px 0; border-bottom: 1px solid var(--border); }
 .brow:last-child { border: none; }
 .bk { color: var(--light); } .bv { color: var(--text); font-weight: 500; }
@@ -634,7 +741,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
   gap: 14px; margin-bottom: 36px;
 }
 .rcard {
-  background: var(--cream2); border: 1px solid var(--border);
+  background: var(--ivory2); border: 1px solid var(--border);
   border-radius: 8px; padding: 18px; transition: transform .15s;
 }
 .rcard:hover { transform: translateY(-2px); }
@@ -642,12 +749,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .rcard-name { font-weight: 500; font-size: .88rem; }
 .rcard-type { font-size: .62rem; color: var(--light); text-transform: capitalize; margin-top: 2px; }
 .rcard-stars { color: var(--gold); font-size: .9rem; letter-spacing: 1px; }
-.rcard-comment { font-size: .8rem; color: var(--mid); line-height: 1.65; margin-bottom: 10px; }
+.rcard-comment { font-size: .8rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 10px; }
 .rcard-date { font-size: .65rem; color: var(--light); }
 
 /* leave a review form */
 #review-form-box {
-  background: var(--cream2); border: 1px solid var(--border);
+  background: var(--ivory2); border: 1px solid var(--border);
   border-radius: 10px; padding: 26px; max-width: 560px; margin: 0 auto;
 }
 #review-form-box h3 {
@@ -668,7 +775,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 .rf { display: flex; flex-direction: column; gap: 4px; }
 .rf label { font-size: .68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--light); }
 .rf input, .rf textarea, .rf select {
-  background: var(--cream); border: 1px solid var(--border);
+  background: var(--ivory); border: 1px solid var(--border);
   border-radius: 4px; padding: 9px 11px;
   font-family: 'Inter', sans-serif; font-size: .82rem; color: var(--text);
   transition: border-color .2s; resize: none;
@@ -686,14 +793,14 @@ main { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
 #btn-submit-review:hover { background: var(--gold2); transform: translateY(-1px); }
 #btn-submit-review:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 #review-msg { margin-top: 10px; font-size: .78rem; display: none; padding: 8px 12px; border-radius: 4px; }
-#review-msg.ok  { display: block; background: var(--green-bg); color: var(--green); border: 1px solid rgba(74,138,90,.25); }
-#review-msg.err { display: block; background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(160,64,64,.22); }
+#review-msg.ok  { display: block; background: var(--sage-bg); color: var(--sage); border: 1px solid rgba(74,138,90,.25); }
+#review-msg.err { display: block; background: var(--sienna-bg);   color: var(--sienna);   border: 1px solid rgba(160,64,64,.22); }
 
 /* ══════════════════════════════════════════════
    FOOTER
 ══════════════════════════════════════════════ */
 footer {
-  background: var(--dark); color: rgba(245,240,232,.7);
+  background: var(--obsidian); color: rgba(245,240,232,.7);
   padding: 56px 48px 28px;
 }
 .footer-top {
@@ -777,7 +884,7 @@ footer {
 }
 .login-logo-icon {
   width: 44px; height: 44px;
-  background: linear-gradient(135deg, var(--dark2), var(--dark3));
+  background: linear-gradient(135deg, var(--obsidian2), var(--dark3));
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   color: var(--gold); font-size: 1.3rem; font-weight: 700;
@@ -866,14 +973,14 @@ footer {
   color: #fff; font-size: .72rem; font-weight: 700;
 }
 .up-name  { font-size: .76rem; font-weight: 500; color: var(--text); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.up-role  { font-size: .58rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); }
+.up-role  { font-size: .58rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
 .btn-logout {
   background: none; border: 1px solid var(--border); border-radius: 4px;
   padding: 5px 11px; font-family: 'Inter', sans-serif;
   font-size: .68rem; letter-spacing: 1px; text-transform: uppercase;
-  color: var(--mid); cursor: pointer; transition: all .2s; margin-left: 4px;
+  color: var(--text-dim); cursor: pointer; transition: all .2s; margin-left: 4px;
 }
-.btn-logout:hover { border-color: var(--red); color: var(--red); }
+.btn-logout:hover { border-color: var(--sienna); color: var(--sienna); }
 
 /* ══════════════════════════════════════════════
    GUEST BANNER
@@ -883,7 +990,7 @@ footer {
   background: linear-gradient(90deg, rgba(37,99,235,.06), rgba(37,99,235,.12));
   border: 1px solid rgba(37,99,235,.2); border-radius: 8px;
   padding: 12px 20px; margin-bottom: 18px;
-  text-align: center; font-size: .8rem; color: var(--mid);
+  text-align: center; font-size: .8rem; color: var(--text-dim);
   animation: fadeIn .4s ease;
 }
 #guest-banner.show { display: block; }
@@ -914,8 +1021,8 @@ footer {
 #my-bookings-section { margin-bottom: 60px; }
 #my-bookings-login-prompt {
   text-align: center; padding: 48px 24px;
-  background: var(--cream2); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--mid); font-size: .9rem;
+  background: var(--ivory2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text-dim); font-size: .9rem;
 }
 #my-bookings-login-prompt .prompt-icon { font-size: 2.4rem; margin-bottom: 12px; }
 #my-bookings-login-prompt p { margin-bottom: 16px; }
@@ -1093,50 +1200,165 @@ footer {
 <!-- ═══════════════════════════════ HERO ════ -->
 <section id="hero">
   <div class="hero-content">
-    <div class="hero-eyebrow">Welcome to TVUC Hotel</div>
-    <h1 class="hero-title">Where Every Stay Becomes<br/><em>A Story Worth Telling</em></h1>
-    <p class="hero-sub">Five floors of handcrafted luxury, overlooking sea, pool, garden, and city vistas.<br/>Select your room, book instantly, and arrive to perfection.</p>
+    <div class="hero-eyebrow" id="hero-eyebrow">Welcome to TVUC Resort & Spa</div>
+    <h1 class="hero-title" id="hero-title">Where Every Stay Becomes<br/><em>A Story Worth Telling</em></h1>
+    <p class="hero-sub" id="hero-sub">Experience unparalleled luxury at our beachfront sanctuary. Five floors of handcrafted elegance overlooking the sea, vibrant gardens, and endless horizons.</p>
     <div class="hero-btns">
-      <a href="#book-section" class="btn-hero-primary" id="btn-hero-explore">Explore Rooms</a>
-      <a href="#reviews-section" class="btn-hero-outline">Read Reviews</a>
+      <a href="#book-section" class="btn-hero-primary" id="btn-hero-explore">Reserve Your Stay</a>
+      <a href="#overview" class="btn-hero-outline">Discover More</a>
     </div>
-    <div class="hero-stats">
-      <div class="hs"><div class="hs-num">50</div><div class="hs-lbl">Rooms</div></div>
-      <div class="hs"><div class="hs-num">5</div><div class="hs-lbl">Floors</div></div>
-      <div class="hs"><div class="hs-num">4.8★</div><div class="hs-lbl">Avg. Rating</div></div>
-      <div class="hs"><div class="hs-num">24/7</div><div class="hs-lbl">Concierge</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ OVERVIEW ════ -->
+<section id="overview" class="section-pad">
+  <div class="lux-heading">
+    <p id="ov-eyebrow">The TVUC Experience</p>
+    <h2 id="ov-heading">A Sanctuary of Elegance</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="overview-grid">
+    <div class="ov-text">
+      <h3 id="ov-text-title">Redefining Coastal Luxury</h3>
+      <p id="ov-text-p1">Nestled along the pristine coastline, TVUC Resort & Spa offers a breathtaking escape from the ordinary. Our resort is a masterful blend of modern architectural brilliance and timeless natural beauty.</p>
+      <p id="ov-text-p2">From the moment you arrive, you'll be enveloped in our signature 5-star hospitality. Whether you're lounging by our iconic infinity pool, indulging in world-class culinary experiences, or simply watching the sunset from your private balcony, every moment here is designed to be unforgettable.</p>
+      <a href="#book-section" class="btn-hero-primary" style="display:inline-block; margin-top:20px; color:#fff;">View Our Suites</a>
+    </div>
+    <div class="ov-img">
+      <img src="/images/overview_img_1778935655047.png" alt="Infinity Pool overlooking the ocean">
     </div>
   </div>
 </section>
 
 <!-- ═══════════════════════════ AMENITIES ═══ -->
-<section id="amenities">
-  <div class="amenities-grid">
-    <div class="amenity"><span>🛜</span> Free Wi-Fi</div>
-    <div class="amenity"><span>🏊</span> Infinity Pool</div>
-    <div class="amenity"><span>🧖</span> Luxury Spa</div>
-    <div class="amenity"><span>🍽️</span> Fine Dining</div>
-    <div class="amenity"><span>🏋️</span> Fitness Centre</div>
-    <div class="amenity"><span>🅿️</span> Valet Parking</div>
-    <div class="amenity"><span>🛎️</span> 24hr Concierge</div>
-    <div class="amenity"><span>✈️</span> Airport Transfer</div>
-    <div class="amenity"><span>🌿</span> Garden Terrace</div>
-    <div class="amenity"><span>🍸</span> Rooftop Bar</div>
+<section id="lux-amenities" class="section-pad">
+  <div class="lux-heading">
+    <p>World-Class Facilities</p>
+    <h2>Curated For Your Comfort</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="am-grid">
+    <div class="am-card">
+      <div class="am-icon">🏊</div>
+      <h4>Infinity Pool</h4>
+      <p>A mesmerizing infinity edge pool that blends seamlessly into the ocean horizon, complete with private cabanas.</p>
+    </div>
+    <div class="am-card">
+      <div class="am-icon">🧖</div>
+      <h4>Zen Spa & Wellness</h4>
+      <p>Rejuvenate your body and mind with our holistic treatments, massage therapies, and sauna experiences.</p>
+    </div>
+    <div class="am-card">
+      <div class="am-icon">🍽️</div>
+      <h4>Award-Winning Dining</h4>
+      <p>Embark on a culinary journey across our signature restaurants, featuring master chefs and global cuisines.</p>
+    </div>
+    <div class="am-card">
+      <div class="am-icon">🍸</div>
+      <h4>Rooftop Lounge</h4>
+      <p>Sip artisanal cocktails under the stars with panoramic views of the vibrant coastline and city lights.</p>
+    </div>
+    <div class="am-card">
+      <div class="am-icon">🛎️</div>
+      <h4>24/7 Elite Concierge</h4>
+      <p>Our dedicated team is always at your service to arrange bespoke experiences and ensure a flawless stay.</p>
+    </div>
+    <div class="am-card">
+      <div class="am-icon">🏖️</div>
+      <h4>Private Beach Access</h4>
+      <p>Step directly onto the soft white sands of our exclusive beach area, fully serviced for your absolute relaxation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ DINING ══════ -->
+<section id="dining" class="section-pad">
+  <div class="lux-heading">
+    <p>Culinary Excellence</p>
+    <h2>A Taste of Luxury</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="dining-grid">
+    <div class="dining-card">
+      <div class="dc-img"><div class="dc-tag">Buffet</div><img src="/images/dining_breakfast_1778935671553.png" alt="Breakfast Hall"></div>
+      <div class="dc-content">
+        <h3>The Morning Tide</h3>
+        <p>Start your day with an opulent breakfast buffet featuring live cooking stations, fresh bakeries, and stunning ocean views in a bright, elegant hall.</p>
+      </div>
+    </div>
+    <div class="dining-card">
+      <div class="dc-img"><div class="dc-tag">Italian</div><img src="/images/dining_italian_1778935687943.png" alt="Italian Restaurant"></div>
+      <div class="dc-content">
+        <h3>Il Tramonto</h3>
+        <p>Experience authentic Italian fine dining. Warm ambient lighting, premium wines, and handcrafted pasta make every dinner romantic and unforgettable.</p>
+      </div>
+    </div>
+    <div class="dining-card">
+      <div class="dc-img"><div class="dc-tag">Indian</div><img src="/images/dining_indian_1778935713799.png" alt="Indian Restaurant"></div>
+      <div class="dc-content">
+        <h3>The Royal Spice</h3>
+        <p>Immerse yourself in traditional luxury. Rich golden decor and soft lighting perfectly complement the complex, majestic flavors of royal Indian cuisine.</p>
+      </div>
+    </div>
+    <div class="dining-card">
+      <div class="dc-img"><div class="dc-tag">Chinese</div><img src="/images/dining_chinese_1778935729333.png" alt="Chinese Restaurant"></div>
+      <div class="dc-content">
+        <h3>Golden Dragon</h3>
+        <p>A sleek, modern Asian dining experience. Enjoy premium oriental delicacies masterfully prepared using ancient techniques in an elegant setting.</p>
+      </div>
+    </div>
+    <div class="dining-card">
+      <div class="dc-img"><div class="dc-tag">Continental</div><img src="/images/dining_continental_1778935747271.png" alt="Continental Restaurant"></div>
+      <div class="dc-content">
+        <h3>Horizon Grill</h3>
+        <p>Modern international flavors meet minimalist luxury. Savor exquisite cuts of meat and fresh seafood in a bright, airy, and sophisticated space.</p>
+      </div>
+    </div>
+    <div class="dining-card">
+      <div class="dc-img"><div class="dc-tag">Lounge</div><img src="/images/dining_bar_1778935764818.png" alt="Luxury Bar"></div>
+      <div class="dc-content">
+        <h3>Skyfall Lounge</h3>
+        <p>The pinnacle of nightlife. A luxury rooftop bar glowing with neon ambience, offering bespoke cocktails, premium spirits, and panoramic city views.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ GALLERY ═════ -->
+<section id="gallery" class="section-pad">
+  <div class="lux-heading light">
+    <p>Visual Journey</p>
+    <h2>The Resort in Pictures</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="gallery-grid">
+    <div class="gal-item"><img src="/images/gallery_pool_1778935791980.png" alt="Infinity Pool"></div>
+    <div class="gal-item"><img src="/images/gallery_suite_1778935810779.png" alt="Luxury Suite"></div>
+    <div class="gal-item"><img src="/images/gallery_spa_1778935829870.png" alt="Zen Spa"></div>
+    <div class="gal-item"><img src="/images/gallery_beach_1778935844846.png" alt="Private Beach"></div>
   </div>
 </section>
 
 <!-- ═══════════════════════════ MAIN ═════════ -->
-<main>
+<main class="section-pad" style="padding-top:0">
 
   <!-- BOOK SECTION -->
   <div id="book-section">
-    <div class="section-head">
+    <div class="lux-heading" style="margin-bottom: 32px;"><p>Reserve Your Stay</p><h2>Select Your Perfect Room</h2><div class="divider"></div></div><div class="section-head" style="display:none;">
       <h2>Book Your Room</h2>
       <p>Rotate the 3D building to explore all rooms · Hover to preview · Click to select</p>
     </div>
 
     <!-- FILTERS -->
     <div id="filter-bar">
+      <div class="fg">
+        <label>Check-In</label>
+        <input type="date" id="main-ci" onchange="onMainDateChange()" />
+      </div>
+      <div class="fg">
+        <label>Check-Out</label>
+        <input type="date" id="main-co" onchange="onMainDateChange()" />
+      </div>
       <div class="fg">
         <label>Floor</label>
         <select id="f-floor" onchange="applyFilter()">
@@ -1221,6 +1443,7 @@ footer {
     </div>
 
     <!-- BOOKING PANEL -->
+    <div id="drawer-overlay" onclick="closePanel()"></div>
     <div id="booking-panel">
       <div class="bp-head">
         <h3 id="panel-title">Reserve Your Room</h3>
@@ -1274,8 +1497,8 @@ footer {
         <div class="f-section">
           <div class="f-title">Stay Dates</div>
           <div class="form-grid two">
-            <div class="fld"><label>Check-In</label><input type="date" id="ci" onchange="calcPrice()" /></div>
-            <div class="fld"><label>Check-Out</label><input type="date" id="co" onchange="calcPrice()" /></div>
+            <div class="fld"><label>Check-In</label><input type="date" id="ci" onchange="onDrawerDateChange()" /></div>
+            <div class="fld"><label>Check-Out</label><input type="date" id="co" onchange="onDrawerDateChange()" /></div>
           </div>
         </div>
 
@@ -1400,6 +1623,67 @@ footer {
 
 </main>
 
+<!-- ═══════════════════ WEBSITE CONTENT EDITOR MODAL ═══════════════════ -->
+<div id="editor-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#1e293b; border:1.5px solid var(--gold); border-radius:14px; padding:32px; max-width:600px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.5); font-family:'Inter',sans-serif; color:#f5f0e8;">
+    <h3 style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:400; text-align:center; margin-bottom:20px; color:var(--gold);">Edit Website Content</h3>
+    <div style="max-height:450px; overflow-y:auto; padding-right:8px; display:flex; flex-direction:column; gap:16px;">
+      
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Hero Subtitle (Eyebrow)</label>
+        <input id="edit-hero-eyebrow" type="text" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Hero Main Title (HTML allowed for styling)</label>
+        <input id="edit-hero-title" type="text" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Hero Description</label>
+        <textarea id="edit-hero-sub" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; height:80px; font-family:'Inter',sans-serif; resize:none; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"></textarea>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Overview Heading (Eyebrow)</label>
+        <input id="edit-ov-eyebrow" type="text" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Overview Title</label>
+        <input id="edit-ov-title" type="text" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Overview Subtitle</label>
+        <input id="edit-ov-subtitle" type="text" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Overview Description Paragraph 1</label>
+        <textarea id="edit-ov-p1" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; height:80px; font-family:'Inter',sans-serif; resize:none; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"></textarea>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="color:var(--gold); font-size:.7rem; letter-spacing:1px; text-transform:uppercase; font-weight:600;">Overview Description Paragraph 2</label>
+        <textarea id="edit-ov-p2" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:10px; color:#fff; font-size:.85rem; height:80px; font-family:'Inter',sans-serif; resize:none; outline:none; transition:border-color .3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"></textarea>
+      </div>
+
+    </div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onclick="closeContentEditor()" style="flex:1; padding:12px; border:1px solid rgba(255,255,255,.15); border-radius:8px; background:transparent; color:#f5f0e8; font-family:'Inter',sans-serif; font-size:.8rem; cursor:pointer; letter-spacing:.5px;">Cancel</button>
+      <button onclick="saveWebsiteContent()" style="flex:2; padding:12px; border:none; border-radius:8px; background:var(--gold); color:#fff; font-family:'Inter',sans-serif; font-size:.8rem; font-weight:600; cursor:pointer; letter-spacing:.5px;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ FLOATING ADMIN PREVIEW PILL ═══════════════════ -->
+<div id="admin-preview-pill" style="display:none; position:fixed; bottom:24px; right:24px; z-index:9999; background:linear-gradient(135deg, #1e293b, #0f172a); border: 1.5px solid var(--gold); border-radius:99px; padding:10px 20px; box-shadow:0 12px 32px rgba(0,0,0,.4); align-items:center; gap:12px; font-family:'Inter', sans-serif;">
+  <span style="font-size:.78rem; font-weight:600; color:#fff; letter-spacing:1px; text-transform:uppercase;" id="admin-mode-text">👁️ Preview Mode</span>
+  <button id="btn-toggle-admin-mode" onclick="toggleAdminPreviewMode()" style="background:var(--gold); border:none; border-radius:99px; padding:6px 14px; font-size:.7rem; font-weight:600; color:#fff; text-transform:uppercase; cursor:pointer; letter-spacing:1px; transition:all .2s;">Switch to Dashboard</button>
+  <button id="btn-edit-website-content" onclick="openContentEditor()" style="background:transparent; border:1px solid rgba(255,255,255,.2); border-radius:99px; padding:6px 14px; font-size:.7rem; font-weight:600; color:#f0e8d8; text-transform:uppercase; cursor:pointer; letter-spacing:1px; transition:all .2s;">✏️ Edit Content</button>
+</div>
+
 <!-- ═════════════════════════ ADMIN PANEL ═════ -->
 <div id="admin-panel">
   <div class="admin-topbar">
@@ -1418,7 +1702,7 @@ footer {
       <div class="astat"><div class="astat-num" id="astat-bookings">—</div><div class="astat-lbl">Total Bookings</div></div>
     </div>
     <!-- All Bookings Table -->
-    <div class="admin-section-head">
+    <div class="admin-section-head" id="admin-reservations-section">
       <h3>All Reservations <span id="admin-table-mode" style="font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-left:8px">Active</span></h3>
       <div style="display:flex;gap:10px">
         <button class="btn-sm" id="btn-show-history" onclick="toggleBookingHistory()" style="border-color:var(--mid);color:var(--mid)">📋 Show History</button>
@@ -1431,16 +1715,16 @@ footer {
         <thead>
           <tr>
             <th>Ref #</th>
-            <th>Guest</th>
-            <th>Email</th>
+            <th>Guest Details</th>
             <th>Room</th>
-            <th>Type</th>
-            <th>View</th>
-            <th>Check-In</th>
-            <th>Check-Out</th>
-            <th>Nights</th>
-            <th>Amount</th>
-            <th>Payment</th>
+            <th>Type & View</th>
+            <th>Stay Duration</th>
+            <th>Breakfast</th>
+            <th>Total Cost</th>
+            <th>Amount Paid</th>
+            <th>Balance Left</th>
+            <th>Paid Status</th>
+            <th>Mark Paid</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -1455,6 +1739,29 @@ footer {
     </div>
     <div id="bf-empty" style="display:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--light);font-size:.85rem">No breakfast orders in active bookings.</div>
     <div id="bf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:60px"></div>
+
+    <!-- ── Room Directory & Pricing Manager ── -->
+    <div class="admin-section-head" style="margin-top:44px">
+      <h3>🏨 Room Directory & Pricing Manager</h3>
+      <span id="rooms-summary" style="font-size:.75rem;color:var(--mid);letter-spacing:.5px"></span>
+    </div>
+    <div class="admin-table-wrap" style="margin-bottom:60px">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Room Number</th>
+            <th>Floor</th>
+            <th>Room Type</th>
+            <th>View Type</th>
+            <th>Current Price / Night</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="admin-rooms-tbody">
+          <tr><td colspan="6" class="admin-empty">Loading rooms list…</td></tr>
+        </tbody>
+      </table>
+    </div>
 
   </div>
 </div>
@@ -1618,6 +1925,7 @@ let bookingData = null;   // stored after successful booking
 
 // ── Init ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  loadWebsiteContent();
   initAuth();
   setDefaultDates();
   loadRooms();
@@ -1632,12 +1940,71 @@ function setDefaultDates() {
   const today = new Date(), tmr = new Date(today);
   tmr.setDate(today.getDate() + 1);
   const f = d => d.toISOString().split('T')[0];
+  
+  const mainCi = document.getElementById('main-ci');
+  const mainCo = document.getElementById('main-co');
+  if (mainCi && mainCo) {
+    mainCi.min = mainCo.min = f(today);
+    mainCi.value = f(today);
+    mainCo.min   = f(tmr);
+    mainCo.value = f(tmr);
+  }
+
   const ci = document.getElementById('ci');
   const co = document.getElementById('co');
-  ci.min = co.min = f(today);
-  ci.value = f(today);
-  co.min   = f(tmr);
-  co.value = f(tmr);
+  if (ci && co) {
+    ci.min = co.min = f(today);
+    ci.value = f(today);
+    co.min   = f(tmr);
+    co.value = f(tmr);
+  }
+}
+
+function validateDates(ciId, coId) {
+  const ciEl = document.getElementById(ciId);
+  const coEl = document.getElementById(coId);
+  if (!ciEl || !coEl) return;
+  const ciVal = ciEl.value;
+  const coVal = coEl.value;
+
+  if (ciVal && coVal) {
+    const ciDate = new Date(ciVal);
+    const coDate = new Date(coVal);
+    if (coDate <= ciDate) {
+      coEl.value = '';
+      showToast('⚠️ Check-out date must be after check-in.');
+    }
+  }
+}
+
+function onMainDateChange() {
+  validateDates('main-ci', 'main-co');
+  
+  const mainCi = document.getElementById('main-ci')?.value || '';
+  const mainCo = document.getElementById('main-co')?.value || '';
+  setV('ci', mainCi);
+  setV('co', mainCo);
+
+  calcPrice();
+
+  if (mainCi && mainCo) {
+    loadRooms();
+  }
+}
+
+function onDrawerDateChange() {
+  validateDates('ci', 'co');
+
+  const ci = document.getElementById('ci')?.value || '';
+  const co = document.getElementById('co')?.value || '';
+  setV('main-ci', ci);
+  setV('main-co', co);
+
+  calcPrice();
+
+  if (ci && co) {
+    loadRooms();
+  }
 }
 
 // ── Drag to Rotate ─────────────────────────────
@@ -1688,7 +2055,13 @@ function snapBuilding(side) {
 // ── Load & Render Rooms ────────────────────────
 async function loadRooms() {
   try {
-    const res = await fetch(`${API}/rooms`);
+    const ci = document.getElementById('main-ci')?.value || '';
+    const co = document.getElementById('main-co')?.value || '';
+    let url = `${API}/rooms`;
+    if (ci && co) {
+      url += `?check_in=${ci}&check_out=${co}`;
+    }
+    const res = await fetch(url);
     rooms = await res.json();
     rooms.forEach(r => r.price = parseFloat(r.price));
     buildHotel(rooms);
@@ -1788,16 +2161,25 @@ function selectRoom(room) {
   }
 
   const panel = document.getElementById('booking-panel');
+  const overlay = document.getElementById('drawer-overlay');
   if (panel) {
     panel.classList.add('open');
-    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    if (overlay) overlay.classList.add('open');
   }
+  // Pre-fill stay dates in drawer from the main date selectors
+  const mainCiVal = document.getElementById('main-ci')?.value || '';
+  const mainCoVal = document.getElementById('main-co')?.value || '';
+  setV('ci', mainCiVal);
+  setV('co', mainCoVal);
+
   clearBpMsg(); calcPrice();
   loadRelatedReviews(room.room_type, room.view_type);
 }
 
 function closePanel() {
   document.getElementById('booking-panel').classList.remove('open');
+  const overlay = document.getElementById('drawer-overlay');
+  if (overlay) overlay.classList.remove('open');
   if (selected) {
     const el = document.getElementById(`rm-${selected.room_id}`);
     if (el && selected.status === 'available') el.classList.replace('selected', 'available');
@@ -1885,7 +2267,7 @@ function openPayment() {
   
   const total = (nights * selected.price) + (500 * (adults + children) * bfDays);
 
-  setT('pm-room-info', `Room ${selected.room_number} · ${nights} night${nights>1?'s':''} · ${adults+children} guest${adults+children>1?'s':''}`);
+  setT('pm-room-info', `Room ${selected.room_number} · ${fmtDate(ci)} to ${fmtDate(co)} (${nights} night${nights>1?'s':''}) · ${adults+children} guest${adults+children>1?'s':''}`);
   setT('pm-total-show', `Rs.${fmt(total)}`);
   const totalShow = document.getElementById('pm-total-show');
   if (totalShow) totalShow.setAttribute('data-raw', total);
@@ -2448,10 +2830,16 @@ function applyAuthState(u) {
   // Admin-only: show All Reservations in main area
   const resSec = document.getElementById('reservations-section');
   if (isAdmin) {
-    resSec.style.display = '';
+    resSec.style.display = 'none'; // We hide this on the main page to keep a clean preview
     loadAdminData();
   } else {
     resSec.style.display = 'none';
+  }
+
+  // Update floating admin pill display
+  const previewPill = document.getElementById('admin-preview-pill');
+  if (previewPill) {
+    previewPill.style.display = isAdmin ? 'flex' : 'none';
   }
 
   // Hide review form for admin (admins don't write reviews)
@@ -2605,6 +2993,9 @@ function doLogout() {
   document.getElementById('nav-admin-link').style.display  = 'none';
   document.getElementById('nav-book-now').style.display    = '';
   document.getElementById('reservations-section').style.display = 'none';
+  
+  const previewPill = document.getElementById('admin-preview-pill');
+  if (previewPill) previewPill.style.display = 'none';
   // Clear My Bookings
   document.getElementById('my-bl-grid').innerHTML = '';
   document.getElementById('my-bookings-login-prompt').style.display = 'block';
@@ -2677,11 +3068,45 @@ function openAdminPanel() {
   document.getElementById('admin-panel').classList.add('open');
   document.getElementById('admin-logged-as').textContent = `Logged in as ${u.email}`;
   loadAdminData();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Scroll directly to active booking details (where rooms are released), skipping the stat dashboard
+  const target = document.getElementById('admin-reservations-section');
+  if (target) {
+    setTimeout(() => {
+      const offset = 140; // Perfect padding below sticky headers
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = target.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }, 100);
+  }
+
+  // Update floating pill
+  setT('admin-mode-text', '📊 Dashboard Mode');
+  const btn = document.getElementById('btn-toggle-admin-mode');
+  if (btn) {
+    btn.textContent = 'Preview Website';
+    btn.style.background = 'transparent';
+    btn.style.border = '1px solid var(--gold)';
+  }
 }
 
 function closeAdminPanel() {
   document.getElementById('admin-panel').classList.remove('open');
+
+  // Update floating pill
+  setT('admin-mode-text', '👁️ Preview Mode');
+  const btn = document.getElementById('btn-toggle-admin-mode');
+  if (btn) {
+    btn.textContent = 'Switch to Dashboard';
+    btn.style.background = 'var(--gold)';
+    btn.style.border = 'none';
+  }
 }
 
 let _showHistory = false;
@@ -2743,21 +3168,52 @@ async function loadAdminData() {
     tbody.innerHTML = '';
     data.forEach(b => {
       const isPast = new Date(b.check_out) < new Date();
+      
+      // Total calculation including breakfast options
+      const nights = Math.round((new Date(b.check_out) - new Date(b.check_in)) / 86400000);
+      const room_total = b.price * nights;
+      const breakfast_total = b.breakfast_opt ? (500 * ((b.adults || 1) + (b.children || 0)) * b.breakfast_days) : 0;
+      const full_total = room_total + breakfast_total;
+      
+      const amount_paid = b.amount || 0;
+      const amount_left = Math.max(0, full_total - amount_paid);
+
       const payLabel = { success:'Paid', advance:'Advance', cash:'Cash', failed:'Failed' }[b.payment_status] || 'Paid';
+      const payDesc = { success:'Credit Card', advance:'30% Card Advance', cash:'Cash @ Hotel', failed:'Failed' }[b.payment_status] || 'Paid';
+
+      const bfOptLabel = b.breakfast_opt ? `🍳 Yes <span style="font-size:.68rem;color:var(--mid)">(${b.breakfast_days}d)</span>` : '<span style="color:var(--light)">✕ No</span>';
+      
+      const balanceHTML = amount_left > 0 ? `
+        <span style="color:var(--red);font-weight:600">Rs.${fmt(amount_left)}</span>
+      ` : `<span style="color:var(--green);font-weight:500;font-size:.8rem">Fully Paid ✓</span>`;
+
+      const checkMarkHTML = amount_left > 0 ? `
+        <input type="checkbox" onclick="toggleBookingPaid(${b.booking_id}, this)" style="accent-color:var(--gold);transform:scale(1.2);cursor:pointer;" title="Mark fully paid">
+      ` : `<span style="color:var(--green);font-weight:600;font-size:1rem">✓</span>`;
+
       const tr = document.createElement('tr');
       if (isPast) tr.classList.add('past');
       tr.innerHTML = `
         <td style="color:var(--light)">#${b.booking_id}</td>
-        <td style="font-weight:500">${esc(b.customer_name)}</td>
-        <td style="color:var(--mid);font-size:.72rem">${esc(b.customer_email)}</td>
-        <td style="font-weight:600">${esc(b.room_number)}</td>
-        <td style="text-transform:capitalize">${b.room_type}</td>
-        <td style="text-transform:capitalize">${b.view_type}</td>
-        <td>${fmtDate(b.check_in)}</td>
-        <td>${fmtDate(b.check_out)}</td>
-        <td style="text-align:center">${Math.round((new Date(b.check_out)-new Date(b.check_in))/86400000)}</td>
-        <td style="color:var(--gold);font-weight:600">Rs.${fmt(b.amount)}</td>
-        <td><span class="pay-badge success">${payLabel}</span></td>
+        <td>
+          <div style="font-weight:600">${esc(b.customer_name)}</div>
+          <div style="font-size:.7rem;color:var(--mid);margin-top:2px">${esc(b.customer_email)} · ${esc(b.customer_phone || '')}</div>
+        </td>
+        <td style="font-weight:700;color:var(--gold)">Room ${esc(b.room_number)}</td>
+        <td style="text-transform:capitalize;font-size:.78rem">${b.room_type} <span style="color:var(--mid)">(${b.view_type})</span></td>
+        <td style="font-size:.78rem">
+          <div>${fmtDate(b.check_in)} to ${fmtDate(b.check_out)}</div>
+          <div style="font-size:.7rem;color:var(--mid);margin-top:2px">${nights} nights</div>
+        </td>
+        <td style="text-align:center">${bfOptLabel}</td>
+        <td style="font-weight:600">Rs.${fmt(full_total)}</td>
+        <td style="color:var(--green);font-weight:600">Rs.${fmt(amount_paid)}</td>
+        <td>${balanceHTML}</td>
+        <td>
+          <span class="pay-badge success" style="font-size:.65rem;padding:2px 6px;margin-bottom:2px">${payLabel}</span>
+          <div style="font-size:.65rem;color:var(--mid)">${payDesc}</div>
+        </td>
+        <td style="text-align:center">${checkMarkHTML}</td>
         <td><button class="btn-release" onclick="releaseRoom(${b.room_id}, ${b.booking_id}, this)">Release</button></td>`;
       tbody.appendChild(tr);
     });
@@ -2775,9 +3231,38 @@ async function loadAdminData() {
         card.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
         card.innerHTML = `
           <div style="font-weight:600;margin-bottom:4px">Room ${esc(b.room_number)} — ${esc(b.customer_name)}</div>
-          <div style="font-size:.75rem;color:var(--mid)">${guests} guests · ${b.breakfast_days} days · Rs.${fmt(bfCost)}</div>`;
+          <div style="font-size:.75rem;color:var(--mid);margin-bottom:4px">${guests} guests · ${b.breakfast_days} days · Rs.${fmt(bfCost)}</div>
+          <div style="font-size:.72rem;color:var(--gold);font-weight:500">🗓️ Stay: ${fmtDate(b.check_in)} to ${fmtDate(b.check_out)}</div>`;
         bfGrid.appendChild(card);
       });
+    }
+
+    // Load room directory list for pricing editor
+    const roomsTbody = document.getElementById('admin-rooms-tbody');
+    if (roomsTbody) {
+      roomsTbody.innerHTML = '<tr><td colspan="6" class="admin-empty">Loading rooms list…</td></tr>';
+      try {
+        const res = await fetch(`${API}/rooms`);
+        const roomsData = await res.json();
+        setT('rooms-summary', `${roomsData.length} total rooms in inventory`);
+        roomsTbody.innerHTML = '';
+        roomsData.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="font-weight:600">Room ${esc(r.room_number)}</td>
+            <td>Floor ${r.floor_number}</td>
+            <td style="text-transform:capitalize">${r.room_type}</td>
+            <td style="text-transform:capitalize">${r.view_type}</td>
+            <td style="color:var(--gold);font-weight:600" id="td-price-${r.room_id}">Rs.${fmt(r.price)}</td>
+            <td>
+              <button class="btn-sm" onclick="editRoomPrice(${r.room_id}, '${r.room_number}', ${r.price})" style="border-color:var(--gold);color:var(--gold);padding:4px 10px;font-size:.7rem;border-radius:4px;cursor:pointer;">✏️ Edit Price</button>
+            </td>
+          `;
+          roomsTbody.appendChild(tr);
+        });
+      } catch(e) {
+        roomsTbody.innerHTML = '<tr><td colspan="6" class="admin-empty" style="color:var(--red)">Failed to load rooms list.</td></tr>';
+      }
     }
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="12" class="admin-empty" style="color:var(--red)">Error loading data.</td></tr>`;
@@ -2866,9 +3351,34 @@ function releaseAllRooms() {
   openReleaseModal('all', null, null, null);
 }
 
+async function toggleBookingPaid(bookingId, checkbox) {
+  if (!checkbox.checked) return; // Only allow checking, not unchecking
+  checkbox.disabled = true;
+  try {
+    const res = await fetch(`${API}/bookings/${bookingId}/pay`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(`Fully paid update applied to Booking #${bookingId}!`);
+      loadAdminData();
+    } else {
+      showToast('❌ Failed to update payment: ' + (data.error || 'Unknown error'));
+      checkbox.checked = false;
+      checkbox.disabled = false;
+    }
+  } catch(e) {
+    showToast('❌ Network error: ' + e.message);
+    checkbox.checked = false;
+    checkbox.disabled = false;
+  }
+}
+
 // ══════════════════════════════════════════════════════
 //  TOAST
 // ══════════════════════════════════════════════════════
+// ── Toast Logic ──
 let _toastTimer;
 function showToast(msg, duration = 3000) {
   const t = document.getElementById('toast');
@@ -2876,6 +3386,103 @@ function showToast(msg, duration = 3000) {
   t.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ══════════════════════════════════════════════════════
+//  ADMIN CONTENT EDITOR & PREVIEW MODE
+// ══════════════════════════════════════════════════════
+function toggleAdminPreviewMode() {
+  const panel = document.getElementById('admin-panel');
+  if (panel && panel.classList.contains('open')) {
+    closeAdminPanel();
+  } else {
+    openAdminPanel();
+  }
+}
+
+function loadWebsiteContent() {
+  const content = localStorage.getItem('tvuc_web_content');
+  if (!content) return;
+  try {
+    const data = JSON.parse(content);
+    if (data.heroEyebrow) setH('hero-eyebrow', data.heroEyebrow);
+    if (data.heroTitle)   setH('hero-title',   data.heroTitle);
+    if (data.heroSub)     setH('hero-sub',     data.heroSub);
+    if (data.ovEyebrow)   setH('ov-eyebrow',   data.ovEyebrow);
+    if (data.ovHeading)   setH('ov-heading',   data.ovHeading);
+    if (data.ovTextTitle) setH('ov-text-title', data.ovTextTitle);
+    if (data.ovTextP1)    setH('ov-text-p1',    data.ovTextP1);
+    if (data.ovTextP2)    setH('ov-text-p2',    data.ovTextP2);
+  } catch(e) {
+    console.error("Error loading web content", e);
+  }
+}
+
+function openContentEditor() {
+  const u = getUser();
+  if (!u || u.role !== 'admin') return;
+
+  // Pre-fill input fields from page content
+  setV('edit-hero-eyebrow', document.getElementById('hero-eyebrow')?.innerHTML || '');
+  setV('edit-hero-title',   document.getElementById('hero-title')?.innerHTML || '');
+  setV('edit-hero-sub',     document.getElementById('hero-sub')?.innerHTML || '');
+  setV('edit-ov-eyebrow',   document.getElementById('ov-eyebrow')?.innerHTML || '');
+  setV('edit-ov-title',     document.getElementById('ov-heading')?.innerHTML || '');
+  setV('edit-ov-subtitle',  document.getElementById('ov-text-title')?.innerHTML || '');
+  setV('edit-ov-p1',        document.getElementById('ov-text-p1')?.innerHTML || '');
+  setV('edit-ov-p2',        document.getElementById('ov-text-p2')?.innerHTML || '');
+
+  document.getElementById('editor-overlay').style.display = 'flex';
+}
+
+function closeContentEditor() {
+  document.getElementById('editor-overlay').style.display = 'none';
+}
+
+function saveWebsiteContent() {
+  const data = {
+    heroEyebrow: getV('edit-hero-eyebrow'),
+    heroTitle:   getV('edit-hero-title'),
+    heroSub:     getV('edit-hero-sub'),
+    ovEyebrow:   getV('edit-ov-eyebrow'),
+    ovHeading:   getV('edit-ov-title'),
+    ovTextTitle: getV('edit-ov-subtitle'),
+    ovTextP1:    getV('edit-ov-p1'),
+    ovTextP2:    getV('edit-ov-p2')
+  };
+
+  localStorage.setItem('tvuc_web_content', JSON.stringify(data));
+  loadWebsiteContent(); // Apply immediately
+  closeContentEditor();
+  showToast('✅ Website content updated successfully.');
+}
+
+async function editRoomPrice(roomId, roomNumber, currentPrice) {
+  const newPriceStr = prompt(`Enter new price for Room ${roomNumber} (current: Rs.${fmt(currentPrice)}):`, currentPrice);
+  if (newPriceStr === null) return; // Cancelled
+  const newPrice = parseFloat(newPriceStr);
+  if (isNaN(newPrice) || newPrice <= 0) {
+    alert('Please enter a valid price greater than 0.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/rooms/${roomId}/price`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ price: newPrice })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(`✅ Room ${roomNumber} price updated to Rs.${fmt(newPrice)}`);
+      loadAdminData(); // Reload admin tables
+      loadRooms();     // Reload 3D room pricing
+    } else {
+      alert(data.error || 'Failed to update room price.');
+    }
+  } catch(e) {
+    alert('Network error: ' + e.message);
+  }
 }
 </script>
 
